@@ -1,3 +1,5 @@
-<div>
-    <!-- Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less. - Maria Skłodowska-Curie -->
-</div>
+<x-layouts::pegawai_app :title="__('Beranda')">
+    <flux:heading size="xl" level="1">Good afternoon, {{ $user->name }}</flux:heading>
+    <flux:text class="mt-2 mb-6 text-base">Here's what's new today</flux:text>
+    <flux:separator variant="subtle" />
+</x-layouts::pegawai_app>

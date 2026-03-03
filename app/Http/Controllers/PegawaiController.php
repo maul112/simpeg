@@ -6,7 +6,13 @@ use Illuminate\Http\Request;
 
 class PegawaiController extends Controller
 {
-    function index() {
-        return view('pegawai.index');
+    public function index() {
+        $user = auth()->user();
+        return view('pegawai.dashboard', compact('user'));
+    }
+
+    public function profile()
+    {
+        return view('pegawai.settings.profil');
     }
 }

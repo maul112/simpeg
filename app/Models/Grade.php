@@ -9,4 +9,9 @@ class Grade extends Model
     protected $fillable = [
         'grade_code'
     ];
+
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
 }

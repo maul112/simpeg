@@ -9,4 +9,9 @@ class Rank extends Model
     protected $fillable = [
         'rank_name'
     ];
+
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
 }

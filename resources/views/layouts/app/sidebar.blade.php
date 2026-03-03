@@ -27,6 +27,10 @@
                     :current="request()->routeIs('golongan.index')" wire:navigate>
                     {{ __('Golongan') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="home" :href="route('pangkat.index')"
+                    :current="request()->routeIs('pangkat.index')" wire:navigate>
+                    {{ __('Pangkat') }}
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 

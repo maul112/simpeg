@@ -12,7 +12,6 @@ class PositionController extends Controller
      */
     public function index()
     {
-        $positions = Position::paginate(10);
         return view('admin.jabatan.index', compact('positions'));
     }
 
