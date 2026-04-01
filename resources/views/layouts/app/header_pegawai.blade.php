@@ -9,8 +9,10 @@
     <flux:header container class="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
         <flux:navbar class="-mb-px max-lg:hidden">
-            <flux:navbar.item icon="home" href="#" current>Beranda</flux:navbar.item>
-            <flux:navbar.item icon="bell" badge="12" href="#">Notifikasi</flux:navbar.item>
+            <flux:navbar.item icon="home" :href="route('pegawai.homepage')"
+                :current="request()->routeIs('pegawai.homepage')" wire:navigate>Beranda</flux:navbar.item>
+            <flux:navbar.item icon="bell" badge="12" :href="route('pegawai.notifikasi')"
+                :current="request()->routeIs('pegawai.notifikasi')" wire:navigate>Notifikasi</flux:navbar.item>
             <flux:navbar.item icon="document-text" href="#">Documents</flux:navbar.item>
             <flux:navbar.item icon="calendar" href="#">Calendar</flux:navbar.item>
             <flux:separator vertical variant="subtle" class="my-2" />
@@ -25,18 +27,19 @@
         </flux:navbar>
         <flux:spacer />
         <flux:navbar class="me-4">
-            <flux:navbar.item icon="magnifying-glass" href="#" label="Search" />
-            <flux:navbar.item class="max-lg:hidden" icon="cog-6-tooth" :href="route('pegawai.pengaturan')"
-                label="Settings" />
-            <flux:navbar.item class="max-lg:hidden" icon="information-circle" href="#" label="Help" />
+            {{--
+            <flux:navbar.item icon="magnifying-glass" href="#" label="Search" /> --}}
+            <flux:navbar.item class="max-lg:hidden" icon="cog-6-tooth" :href="route('pegawai.profil')"
+                label="Settings" wire:navigate />
+            {{--
+            <flux:navbar.item class="max-lg:hidden" icon="information-circle" href="#" label="Help" /> --}}
         </flux:navbar>
         <flux:dropdown position="top" align="start">
             <flux:profile avatar="https://fluxui.dev/img/demo/user.png" />
             <flux:menu>
-                <flux:menu.radio.group>
-                    <flux:menu.radio checked>Olivia Martin</flux:menu.radio>
-                    <flux:menu.radio>Truly Delta</flux:menu.radio>
-                </flux:menu.radio.group>
+                <flux:menu.item class="w-full cursor-pointer" :href="route('pegawai.profil')" icon="user" wire:navigate>
+                    Profil
+                </flux:menu.item>
                 <flux:menu.separator />
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf

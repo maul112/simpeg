@@ -1,17 +1,17 @@
-<x-layouts::auth :title="__('Register')">
+<x-layouts::auth :title="__('Masuk')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Daftar')" :description="__('Masukkan data detail anda untuk membuat akun')" />
+        <x-auth-header :title="__('Masuk')" :description="__('Masukkan data anda untuk masuk')" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ route('tamu.masuk') }}" class="flex flex-col gap-6">
             @csrf
             <!-- Name -->
             <flux:input
                 name="name"
-                :label="__('Name')"
-                :value="old('name')"
+                :label="__('Nama')"
+                :value="old('nama')"
                 type="text"
                 required
                 autofocus
@@ -19,18 +19,18 @@
                 :placeholder="__('Full name')"
             />
 
-            <!-- Email Address -->
+            <!-- Address -->
             <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
+                name="address"
+                :label="__('Alamat')"
+                :value="old('address')"
+                type="text"
                 required
-                autocomplete="email"
-                placeholder="email@example.com"
+                autocomplete="Alamat"
+                placeholder="JL. Raya Soetomo"
             />
 
-            <!-- Password -->
+            {{-- <!-- Password -->
             <flux:input
                 name="password"
                 :label="__('Password')"
@@ -50,11 +50,11 @@
                 autocomplete="new-password"
                 :placeholder="__('Confirm password')"
                 viewable
-            />
+            /> --}}
 
             <div class="flex items-center justify-end">
                 <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Buat akun') }}
+                    {{ __('Masuk') }}
                 </flux:button>
             </div>
         </form>

@@ -26,6 +26,16 @@ class User extends Authenticatable
         'employee_id'
     ];
 
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->employee_id === null;
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

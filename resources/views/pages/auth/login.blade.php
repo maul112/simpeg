@@ -43,11 +43,11 @@
             </div>
         </form>
 
-        @if (Route::has('register'))
+        {{-- @if (Route::has('register'))
             <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
                 <span>{{ __('Tidak punya akun?') }}</span>
                 <flux:link :href="route('register')" wire:navigate>{{ __('Daftar') }}</flux:link>
             </div>
-        @endif
+        @endif --}}
     </div>
 </x-layouts::auth>

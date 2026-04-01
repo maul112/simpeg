@@ -18,6 +18,9 @@ return new class extends Migration
             $table->date('birth_date')->nullable();
             $table->enum('gender', ['laki-laki', 'perempuan'])->nullable();
             $table->string('status');
+            $table->dateTime('tmt_start')->default(now());
+            $table->dateTime('tmt_end')->nullable();
+            $table->enum('type', ['Non ASN', 'ASN'])->default('Non ASN');
 
             // RELASI
             $table->foreignId('grade_id')
