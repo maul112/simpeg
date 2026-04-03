@@ -45,6 +45,45 @@
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
     }
+
+    /* Menargetkan semua elemen Flux yang memiliki atribut input */
+    [data-flux-input]:focus-within {
+        /* Mengubah warna border saat fokus */
+        border-color: #059669 !important; /* emerald-600 */
+        
+        /* Mengubah warna ring/outline saat fokus */
+        --tw-ring-color: #059669 !important;
+        --flux-ring: #059669 !important;
+        --flux-border: #059669 !important;
+        
+        /* Menghilangkan ring zinc default jika masih muncul */
+        outline-color: #059669 !important;
+    }
+
+    /* Khusus untuk elemen input aslinya di dalam Flux */
+    [data-flux-input] input:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 2px white, 0 0 0 4px #059669 !important;
+    }
+
+    /* Menargetkan komponen flux:link secara global */
+    [data-flux-link] {
+        color: #059669 !important; /* emerald-600 */
+        text-decoration-color: rgba(5, 150, 105, 0.3) !important; /* garis bawah halus */
+        transition: color 0.2s ease-in-out;
+    }
+
+    /* Efek saat link di-hover (diarahkan kursor) */
+    [data-flux-link]:hover {
+        color: #047857 !important; /* emerald-700 (sedikit lebih gelap agar kontras) */
+        text-decoration-color: #047857 !important;
+    }
+
+    /* Efek saat link mendapatkan fokus (navigasi keyboard) */
+    [data-flux-link]:focus {
+        outline-color: #059669 !important;
+        --flux-ring: #059669 !important;
+    }
 }
 
 [data-flux-field]:not(ui-radio, ui-checkbox) {

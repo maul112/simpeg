@@ -1,7 +1,7 @@
 <x-layouts::pegawai_app :title="__('Profil')">
     <section class="w-full">
         @include('partials.settings-heading')
-        <x-pages::settings.pegawai_layout :heading="__('Profil')" :subheading="__('Perbarui alamat email kamu')">
+        <x-pages::settings.pegawai_layout :heading="__('Profil')" :subheading="__('Perbarui profil dan alamat email kamu')">
             @if(session('status'))
                 <flux:subheading class="text-green-600">
                     {{ session('status') }}

@@ -1,6 +1,6 @@
 <x-layouts::auth :title="__('Log in')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Masuk ke akun anda')" :description="__('Masukkan email dan password dibawah untuk masuk ke akun anda')" />
+        <x-auth-header :title="__('Masuk ke akun anda')" :description="__('Masukkan email dan password dibawah untuk masuk ke akun pegawai anda')" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -9,45 +9,30 @@
             @csrf
 
             <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
-                required
-                autofocus
-                autocomplete="email"
-                placeholder="email@contoh.com"
-            />
+            <flux:input name="email" :label="__('Email address')" :value="old('email')" type="email" required autofocus
+                autocomplete="email" placeholder="email@contoh.com" />
 
             <!-- Password -->
             <div class="relative">
-                <flux:input
-                    name="password"
-                    :label="__('Password')"
-                    type="password"
-                    required
-                    autocomplete="current-password"
-                    :placeholder="__('Password')"
-                    viewable
-                />
+                <flux:input name="password" :label="__('Password')" type="password" required
+                    autocomplete="current-password" :placeholder="__('Password')" viewable />
             </div>
 
             <!-- Remember Me -->
             <flux:checkbox name="remember" :label="__('Remember me')" :checked="old('remember')" />
 
             <div class="flex items-center justify-end">
-                <flux:button variant="primary" type="submit" class="w-full" data-test="login-button">
+                <flux:button variant="primary" type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700"
+                    data-test="login-button">
                     {{ __('Masuk') }}
                 </flux:button>
             </div>
         </form>
 
-        {{-- @if (Route::has('register'))
-            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
-                <span>{{ __('Tidak punya akun?') }}</span>
-                <flux:link :href="route('register')" wire:navigate>{{ __('Daftar') }}</flux:link>
+        @if (Route::has('home'))
+            <div class="space-x-1 text-sm text-center rtl:space-x-reverse">
+                <flux:link :href="route('home')" wire:navigate>{{ __('Homepage') }}</flux:link>
             </div>
-        @endif --}}
+        @endif
     </div>
 </x-layouts::auth>
