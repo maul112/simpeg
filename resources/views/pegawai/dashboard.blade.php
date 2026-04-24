@@ -25,6 +25,27 @@
             </div>
         </flux:card>
 
+        <flux:card class="p-6! border-l-4 border-l-indigo-500">
+            <div class="flex items-center gap-4">
+                <div class="bg-indigo-50 text-indigo-600 p-3 rounded-full dark:bg-indigo-900/30">
+                    <flux:icon.academic-cap class="w-7 h-7" />
+                </div>
+
+                <div>
+                    <flux:subheading>Pendidikan Terakhir</flux:subheading>
+
+                    <flux:heading size="lg">
+                        {{ $employee->education_level ?? '-' }}
+                        @if($employee->education_detail)
+                            <span class="text-sm font-normal text-zinc-500">
+                                / ({{ $employee->education_detail }})
+                            </span>
+                        @endif
+                    </flux:heading>
+                </div>
+            </div>
+        </flux:card>
+
         {{-- 2. STATISTIC CARDS --}}
         <div class="grid gap-4 md:grid-cols-3">
             {{-- Masa Kerja --}}

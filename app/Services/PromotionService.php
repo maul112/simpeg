@@ -1,153 +1,106 @@
 <?php
 
+
 namespace App\Services;
 
-use Illuminate\Support\Carbon;
-use App\Models\Notification;
-use Illuminate\Support\Str;
+use App\Models\Employee;
+use Carbon\Carbon;
 
 class PromotionService
 {
-    // Pemetaan jadwal spesifik untuk masing-masing tipe notifikasi
-    protected array $typeSchedules = [
-        'pangkat' => [
-            ['method' => 'subMonths', 'value' => 8, 'label' => '8 Bulan']
-        ],
-        'gaji_berkala' => [
-            ['method' => 'subMonths', 'value' => 1, 'label' => '1 Bulan']
-        ],
-        'pensiun' => [
-            ['method' => 'subYears', 'value' => 1, 'label' => '1 Tahun']
-        ],
-    ];
-
-    public function checkAndGenerateNotifications($users)
+    public function process()
     {
-        $now = Carbon::parse(now())->startOfDay();
-        // $debugNotif = [];
-
-        // 1. Kumpulkan semua ID Pegawai yang valid
-        $employeeIds = [];
-        foreach ($users as $user) {
-            if ($user->employee) {
-                $employeeIds[] = $user->employee->id;
+        $employees = Employee::get();
+        foreach ($employees as $employee) {
+            if (!$this->isEligibleByTime($employee)) {
+                continue;
             }
-        }
-
-        // 2. QUERY OPTIMIZATION: Tarik SEMUA notifikasi tahun ini hanya dengan 1 Query
-        // Gunakan get() dan pilih kolom yang diperlukan saja agar hemat memori RAM
-        $existingNotifications = Notification::whereIn('employee_id', $employeeIds)
-            ->whereYear('created_at', $now->year)
-            ->get(['employee_id', 'type', 'title']);
-
-        // 3. Susun data ke array multidimensi untuk pencarian kilat (O(1) Lookup)
-        // Format: $notifCache[employee_id][type] = ['Judul Notif 1', 'Judul Notif 2']
-        $notifCache = [];
-        foreach ($existingNotifications as $notif) {
-            $notifCache[$notif->employee_id][$notif->type][] = $notif->title;
-        }
-
-        foreach ($users as $user) {
-            $employee = $user->employee;
-            if (!$employee) continue;
-
-            foreach ($this->typeSchedules as $type => $schedules) {
+            
+            
+            $nextRank = $this->getNextRank($employee->rank_grade_id);
+            if (!$nextRank) {
+                continue;
+            }
                 
-                $targetDate = $this->calculateTargetDate($employee, $type, $now);
-
-                if (!$targetDate || $now->greaterThanOrEqualTo($targetDate)) {
-                    continue;
-                }
-
-                foreach ($schedules as $schedule) {
-                    
-                    $triggerDate = $targetDate->copy()->{$schedule['method']}($schedule['value']);
-
-                    if ($now->greaterThanOrEqualTo($triggerDate)) {
-                        
-                        // 4. KUNCI GEMBOK (OPTIMIZED): Cek langsung dari array di memori
-                        $alreadyNotified = false;
-                        $searchKeyword = 'H-' . $schedule['label'];
-
-                        // Pastikan key array ada sebelum di-loop untuk menghindari Error Undefined Array Key
-                        if (isset($notifCache[$employee->id][$type])) {
-                            foreach ($notifCache[$employee->id][$type] as $existingTitle) {
-                                // str_contains adalah bawaan PHP 8, berfungsi seperti LIKE '%keyword%' di SQL
-                                if (str_contains($existingTitle, $searchKeyword)) {
-                                    $alreadyNotified = true;
-                                    break; 
-                                }
-                            }
-                        }
-
-                        if (!$alreadyNotified) {
-                            // $debugNotif[] = [
-                            //     'nama' => $employee->name,
-                            //     'jenis' => Str::headline($type),
-                            //     'kategori_notif' => 'H-' . $schedule['label'],
-                            //     'tanggal_target' => $targetDate->format('d M Y'),
-                            //     'tanggal_trigger' => $triggerDate->format('d M Y'),
-                            // ];
-
-                            // 5. Buat Notifikasi Baru
-                            $newTitle = 'Peringatan H-' . $schedule['label'] . ' ' . Str::headline($type);
-                            
-                            Notification::create([
-                                'employee_id' => $employee->id,
-                                'type'        => $type,
-                                'title'       => $newTitle,
-                                'message'     => "Sistem mendeteksi jadwal " . Str::headline($type) . " untuk {$employee->name} jatuh pada " . $targetDate->format('d M Y') . ". Mohon segera persiapkan berkas yang dibutuhkan.",
-                                'is_read'     => false,
-                            ]);
-
-                            // 6. PENTING: Masukkan notifikasi yang baru dibuat ini ke dalam array cache
-                            // Ini untuk mencegah notifikasi terkirim dua kali jika loop berjalan lebih dari sekali untuk pegawai yang sama
-                            $notifCache[$employee->id][$type][] = $newTitle;
-                        }
-                    }
-                }
+            dd($this->requiresSK($employee, $employee->rank_grade_id, $nextRank));
+            // 🚫 butuh SK → skip
+            if ($this->requiresSK($employee, $employee->rank_grade_id, $nextRank)) {
+                continue;
             }
+
+            // ✅ auto promote
+            $this->promote($employee, $nextRank);
         }
-        // dd($debugNotif);
     }
 
-    /**
-     * "OTAK" LOGIKA: Menghitung target tanggal berdasarkan aturan masing-masing tipe
-     */
-    private function calculateTargetDate($employee, string $type, Carbon $now)
+    private function isEligibleByTime($employee)
     {
-        switch ($type) {
-            case 'pangkat':
-                // Kelipatan 4 Tahun dari TMT
-                if (!$employee->tmt_start) return null;
-                $tmt = Carbon::parse($employee->tmt_start)->startOfDay();
-                $yearsElapsed = $tmt->floatDiffInYears($now);
-                
-                $nextCycle = ceil($yearsElapsed / 4) * 4;
-                if ($nextCycle == 0) $nextCycle = 4;
-                return $tmt->copy()->addYears($nextCycle);
-                
-            case 'gaji_berkala':
-                // Kelipatan 2 Tahun dari TMT
-                if (!$employee->tmt_start) return null;
-                $tmt = Carbon::parse($employee->tmt_start)->startOfDay();
-                $yearsElapsed = $tmt->floatDiffInYears($now);
-                
-                $nextCycle = ceil($yearsElapsed / 2) * 2;
-                if ($nextCycle == 0) $nextCycle = 2;
-                return $tmt->copy()->addYears($nextCycle);
+        if (!$employee->tmt_start) return false;
 
-            case 'pensiun':
-                // Umur 60 Tahun
-                if (!$employee->birth_date) return null;
-                
-                $bday = Carbon::parse($employee->birth_date)->startOfDay();
-                $umurPensiun = 60; // Batas Usia Pensiun (BUP)
-                
-                return $bday->copy()->addYears($umurPensiun);
+        return Carbon::parse($employee->tmt_start)
+            ->addYears(4)
+            ->lte(now());
+    }
 
-            default:
-                return null;
+    private function getNextRank($currentId)
+    {
+        $map = [
+            14 => 13, // I/a → I/b
+            13 => 12,
+            12 => 11,
+            11 => 10, // II/a
+            10 => 9,
+            9 => 8,
+            8 => 7,
+            7 => 6,   // III/a
+            6 => 5,
+            5 => 4,
+            4 => 3,
+            3 => 2,   // IV/a
+            2 => 1,   // IV/b
+        ];
+
+        return $map[$currentId] ?? null;
+    }
+
+    private function requiresSK($employee, $currentId, $nextId)
+    {
+        $currentGol = $this->getGolongan($currentId);
+        $nextGol = $this->getGolongan($nextId);
+
+        // masih dalam golongan sama → aman
+        if ($currentGol === $nextGol) {
+            return false;
         }
+
+        $level = $employee->education_level;
+
+        // syarat minimal untuk masuk golongan berikutnya
+        $minRequirement = match ($nextGol) {
+            2 => ['SMA','D1','D2','D3','D4','S1','S2','S3'],
+            3 => ['D4','S1','S2','S3'],
+            4 => ['S2','S3'],
+            default => ['SD','SMP'],
+        };
+
+        return !in_array($level, $minRequirement);
+    }
+
+    private function promote($employee, $nextRankId)
+    {
+        $employee->update([
+            'rank_grade_id' => $nextRankId,
+            'tmt_start' => now(), // reset masa kerja
+        ]);
+    }
+
+    private function getGolongan($rankId)
+    {
+        return match (true) {
+            $rankId >= 11 => 1, // I
+            $rankId >= 7  => 2, // II
+            $rankId >= 3  => 3, // III
+            default       => 4, // IV
+        };
     }
 }

@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\User;
+use App\Services\NotificationService;
+use App\Services\PromotionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
-use App\Services\PromotionService;
 
 class TamuController extends Controller
 {
@@ -16,24 +17,25 @@ class TamuController extends Controller
         return view('tamu.index', compact('name', 'address'));
     }
 
-    public function masukForm(PromotionService $promotionService)
+    public function masukForm(NotificationService $promotionService)
     {
         return view('pages.auth.register');
     }
 
     public function masuk(Request $request)
     {
-        $name = $request->input('name');
-        $address = $request->input('address');
-        Cookie::queue('guest_name', $name, 1440);
-        Cookie::queue('guest_address', $address, 1440);
-        return redirect()->route('tamu.index');
+        // $name = $request->input('name');
+        // $address = $request->input('address');
+        // Cookie::queue('guest_name', $name, 1440);
+        // Cookie::queue('guest_address', $address, 1440);
+        // return redirect()->route('tamu.index');
     }
 
-    public function create(PromotionService $promotionService)
+    public function create(NotificationService $notificationService, PromotionService $promotionService)
     {
         $users = User::has('employee')->with('employee')->get();
-        $promotionService->checkAndGenerateNotifications($users);
+        $notificationService->checkAndGenerateNotifications($users);
+        $promotionService->process();
         // if (count($result) > 0) {
         //     dd($result);
         // }

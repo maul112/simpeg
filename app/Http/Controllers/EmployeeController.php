@@ -64,29 +64,25 @@ class EmployeeController extends Controller
             'birth_date'    => 'required|date',
             'gender'        => 'required|in:l,p',
             'status'        => 'required|string',
+            'education_level' => 'required|in:SD,SMP,SMA,D1,D2,D3,D4,S1,S2,S3',
+            'education_detail' => 'nullable|string|max:255',
             'tmt_start'     => 'required|date',
             'tmt_end'       => 'nullable|date|after_or_equal:tmt_start',
             'tmt_kgb'       => 'required|date|after_or_equal:tmt_start',
             'type'          => 'required|in:ASN,Non ASN',
-            
-            // Foreign Keys (Opsional tapi disarankan)
-            'grade_id'      => 'nullable|exists:grades,id',
-            'rank_id'       => 'nullable|exists:ranks,id',
             'position_id'   => 'nullable|exists:positions,id',
+            'rank_grade_id' => 'nullable|exists:rank_grades,id',
         ];
 
         // 2. Definisikan Pesan Bahasa Indonesia
         $messages = [
             'required'        => 'Kolom :attribute wajib diisi.',
-            'email'           => 'Format :attribute tidak valid.',
             'unique'          => ':attribute ini sudah terdaftar di sistem.',
-            'min'             => ':attribute minimal harus berisi :min karakter.',
-            'max'             => ':attribute maksimal berisi :max karakter.',
             'digits'          => ':attribute harus berupa angka dan tepat :digits digit.',
             'date'            => 'Format :attribute harus berupa tanggal yang valid.',
             'after_or_equal'  => 'Tanggal :attribute harus sama dengan atau setelah TMT Start.',
             'in'              => 'Pilihan :attribute tidak valid.',
-            'exists'          => 'Data :attribute yang dipilih tidak ditemukan di database.',
+            'exists'          => 'Data :attribute yang dipilih tidak ditemukan.',
         ];
 
         // 3. Ubah nama atribut agar lebih enak dibaca user (Opsional)
@@ -94,13 +90,15 @@ class EmployeeController extends Controller
             'name'          => 'Nama Lengkap',
             'birth_date'    => 'Tanggal Lahir',
             'gender'        => 'Jenis Kelamin',
+            'status'        => 'Status Pegawai',
+            'education_level' => 'Pendidikan Terakhir',
+            'education_detail' => 'Detail Pendidikan',
             'tmt_start'     => 'TMT Awal',
             'tmt_end'       => 'TMT Akhir',
             'tmt_kgb'       => 'TMT KGB',
             'type'          => 'Tipe Pegawai',
-            'grade_id'      => 'Golongan',
-            'rank_id'       => 'Pangkat',
             'position_id'   => 'Jabatan',
+            'rank_grade_id' => 'Pangkat/Gol',
         ];
 
         // 4. Eksekusi Validasi
@@ -114,13 +112,14 @@ class EmployeeController extends Controller
                 'birth_date'    => $validatedData['birth_date'],
                 'gender'        => $validatedData['gender'],
                 'status'        => $validatedData['status'],
+                'education_level' => $validatedData['education_level'],
+                'education_detail' => $validatedData['education_detail'],
                 'tmt_start'     => $validatedData['tmt_start'],
                 'tmt_end'       => $validatedData['tmt_end'] ?? null,
                 'tmt_kgb'       => $validatedData['tmt_kgb'],
                 'type'          => $validatedData['type'],
-                'grade_id'      => $validatedData['grade_id'] ?? null,
-                'rank_id'       => $validatedData['rank_id'] ?? null,
                 'position_id'   => $validatedData['position_id'] ?? null,
+                'rank_grade_id' => $validatedData['rank_grade_id'] ?? null,
             ]);
 
             User::create([
@@ -147,13 +146,14 @@ class EmployeeController extends Controller
     public function edit(Employee $pegawai)
     {
         $rank_grades = RankGrade::all();
-        $positions = Position::all();   
+        $positions = Position::all();
+        // dd($pegawai);
         return view('admin.pegawai.edit', compact('pegawai', 'rank_grades', 'positions'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
+        
+        /**
+         * Update the specified resource in storage.
+        */
     public function update(Request $request, Employee $pegawai)
     {
         $rules = [
@@ -164,21 +164,24 @@ class EmployeeController extends Controller
             'birth_date'    => 'required|date',
             'gender'        => 'required|in:l,p',
             'status'        => 'required|string',
+            'education_level' => 'required|in:SD,SMP,SMA,D1,D2,D3,D4,S1,S2,S3',
+            'education_detail' => 'required|string',
             'tmt_start'     => 'required|date',
             'tmt_end'       => 'nullable|date|after_or_equal:tmt_start',
             'tmt_kgb'       => 'required|date|after_or_equal:tmt_start',
             'type'          => 'required|string',
-            'grade_id'      => 'nullable|exists:grades,id',
-            'rank_id'       => 'nullable|exists:ranks,id',
             'position_id'   => 'nullable|exists:positions,id',
+            'rank_grade_id' => 'nullable|exists:rank_grades,id',
         ];
 
         $messages = [
             'required'        => 'Kolom :attribute wajib diisi.',
             'unique'          => ':attribute ini sudah dipakai orang lain.',
+            'digits'          => ':attribute harus berupa angka dan tepat :digits digit.',
+            'date'            => 'Format :attribute harus berupa tanggal yang valid.',
             'after_or_equal'  => 'Tanggal :attribute harus sama dengan atau setelah TMT Awal.',
-            'min'             => ':attribute minimal :min karakter.',
             'in'              => 'Pilihan pada kolom :attribute tidak valid.',
+            'exists'          => 'Data :attribute yang dipilih tidak ditemukan.',
         ];
 
         $attributes = [
@@ -190,9 +193,8 @@ class EmployeeController extends Controller
             'tmt_end'       => 'TMT Akhir',
             'tmt_kgb'       => 'TMT Kenaikan Gaji Berkala',
             'type'          => 'Tipe Pegawai',
-            'grade_id'      => 'Golongan',
-            'rank_id'       => 'Pangkat',
             'position_id'   => 'Jabatan',
+            'rank_grade_id' => 'Pangkat/Gol',
         ];
 
         $validatedData = $request->validate($rules, $messages, $attributes);
@@ -205,13 +207,14 @@ class EmployeeController extends Controller
                 'birth_date'    => $validatedData['birth_date'],
                 'gender'        => $validatedData['gender'],
                 'status'        => $validatedData['status'],
+                'education_level' => $validatedData['education_level'],
+                'education_detail' => $validatedData['education_detail'],
                 'tmt_start'     => $validatedData['tmt_start'],
                 'tmt_end'       => $validatedData['tmt_end'] ?? null,
                 'tmt_kgb'       => $validatedData['tmt_kgb'],
                 'type'          => $validatedData['type'],
-                'grade_id'      => $validatedData['grade_id'] ?? null,
-                'rank_id'       => $validatedData['rank_id'] ?? null,
                 'position_id'   => $validatedData['position_id'] ?? null,
+                'rank_grade_id' => $validatedData['rank_grade_id'] ?? null,
             ]);
         });
 

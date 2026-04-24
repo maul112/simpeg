@@ -29,11 +29,29 @@
 
                         <flux:select name="gender" label="Jenis Kelamin" required>
                             <option value="">Pilih Jenis Kelamin...</option>
-                            <option value="laki-laki" {{ old('gender') == 'laki-laki' ? 'selected' : '' }}>Laki-Laki
+                            <option value="l" {{ old('gender') == 'l' ? 'selected' : '' }}>Laki-Laki
                             </option>
-                            <option value="perempuan" {{ old('gender') == 'perempuan' ? 'selected' : '' }}>Perempuan
+                            <option value="p" {{ old('gender') == 'p' ? 'selected' : '' }}>Perempuan
                             </option>
                         </flux:select>
+
+                        <flux:select name="education_level" label="Jenjang Pendidikan Terakhir" required>
+                            <option value="">-- Pilih Jenjang --</option>
+
+                            <option value="SD" {{ old('education_level') == 'SD' ? 'selected' : '' }}>SD</option>
+                            <option value="SMP" {{ old('education_level') == 'SMP' ? 'selected' : '' }}>SMP</option>
+                            <option value="SMA" {{ old('education_level') == 'SMA' ? 'selected' : '' }}>SMA</option>
+                            <option value="D1" {{ old('education_level') == 'D1' ? 'selected' : '' }}>D1</option>
+                            <option value="D2" {{ old('education_level') == 'D2' ? 'selected' : '' }}>D2</option>
+                            <option value="D3" {{ old('education_level') == 'D3' ? 'selected' : '' }}>D3</option>
+                            <option value="D4" {{ old('education_level') == 'D4' ? 'selected' : '' }}>D4</option>
+                            <option value="S1" {{ old('education_level') == 'S1' ? 'selected' : '' }}>S1</option>
+                            <option value="S2" {{ old('education_level') == 'S2' ? 'selected' : '' }}>S2</option>
+                            <option value="S3" {{ old('education_level') == 'S3' ? 'selected' : '' }}>S3</option>
+                        </flux:select>
+
+                        <flux:input type="text" name="education_detail" label="Detail Pendidikan"
+                            value="{{ old('education_detail') }}" placeholder="Contoh: IPS / Teknik / Manajemen" />
                     </div>
                 </fieldset>
 
@@ -64,9 +82,9 @@
 
                         <flux:input id="tmt_akhir" type="date" name="tmt_end"
                             label="TMT Akhir (Kosongkan jika aktif terus)" value="{{ old('tmt_end') }}" />
-                        
-                        <flux:input id="tmt_kgb" type="date" name="tmt_kgb"
-                            label="TMT Kenaikan Gaji Berkala" value="{{ old('tmt_kgb') }}" />
+
+                        <flux:input id="tmt_kgb" type="date" name="tmt_kgb" label="TMT Kenaikan Gaji Berkala"
+                            value="{{ old('tmt_kgb') }}" />
 
                         {{-- Foreign Keys --}}
                         {{-- Catatan: Pastikan Anda mengirim $grades, $ranks, dan $positions dari Controller --}}
@@ -78,7 +96,7 @@
                                         @if ($rank_grade->rank_name === null)
                                             {{ $rank_grade->grade_code }}
                                         @else
-                                            {{ $rank_grade->rank_name . " - " . "(" .  $rank_grade->grade_code . ")" }}
+                                            {{ $rank_grade->rank_name . " - " . "(" . $rank_grade->grade_code . ")" }}
                                         @endif
                                     </option>
                                 @endforeach
@@ -88,11 +106,11 @@
                         {{-- <flux:select name="rank_id" label="Pangkat">
                             <option value="">-- Tidak Ada / Belum Ditentukan --</option>
                             @isset($ranks)
-                                @foreach($ranks as $rank)
-                                    <option value="{{ $rank->id }}" {{ old('rank_id') == $rank->id ? 'selected' : '' }}>
-                                        {{ $rank->rank_name }}
-                                    </option>
-                                @endforeach
+                            @foreach($ranks as $rank)
+                            <option value="{{ $rank->id }}" {{ old('rank_id')==$rank->id ? 'selected' : '' }}>
+                                {{ $rank->rank_name }}
+                            </option>
+                            @endforeach
                             @endisset
                         </flux:select> --}}
 
@@ -113,7 +131,7 @@
                         Batal
                     </flux:button>
 
-                    <flux:button type="submit" variant="primary" wire:navigate>
+                    <flux:button type="submit" variant="primary" class="cursor-pointer">
                         Simpan Pegawai
                     </flux:button>
                 </div>

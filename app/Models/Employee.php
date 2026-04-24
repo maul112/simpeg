@@ -12,12 +12,14 @@ class Employee extends Model
         'birth_date',
         'gender',
         'status',
+        'education_level',
+        'education_detail',
         'tmt_start',
         'tmt_end',
         'tmt_kgb',
         'type',
         'position_id',
-        'rankgrade_id',
+        'rank_grade_id',
     ];
 
     public function initials(): string

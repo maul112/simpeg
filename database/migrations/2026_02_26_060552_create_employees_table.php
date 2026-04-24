@@ -18,6 +18,8 @@ return new class extends Migration
             $table->date('birth_date');
             $table->enum('gender', ['l', 'p'])->default('l');
             $table->enum('status', ['active', 'nonactive'])->default('active');
+            $table->enum('education_level', ['SD', 'SMP', 'SMA', 'D1', 'D2', 'D3', 'D4', 'S1', 'S2', 'S3'])->nullable();
+            $table->string('education_detail')->nullable();
             $table->date('tmt_start')->default(now());
             $table->date('tmt_end')->nullable();
             $table->date('tmt_kgb')->nullable();

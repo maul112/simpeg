@@ -93,7 +93,7 @@
                                 </flux:button>
 
                                 <flux:modal.trigger name="delete-employee-{{ $employee->id }}">
-                                    <flux:button size="sm" variant="danger">
+                                    <flux:button size="sm" variant="danger" class="cursor-pointer">
                                         Hapus
                                     </flux:button>
                                 </flux:modal.trigger>
@@ -117,7 +117,7 @@
                                                     <flux:button variant="ghost">Batal</flux:button>
                                                 </flux:modal.close>
 
-                                                <flux:button type="submit" variant="danger">
+                                                <flux:button type="submit" variant="danger" class="cursor-pointer">
                                                     Ya, Hapus Data
                                                 </flux:button>
                                             </div>
