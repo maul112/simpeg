@@ -42,7 +42,7 @@ Route::middleware(['auth', 'admin', 'isAdminSampah'])->group(function () {
     });
 });
     
-Route::middleware(['auth', ])->group(function () {
+Route::middleware(['auth', 'isPegawai'])->group(function () {
     Route::get('/homepage', [PegawaiController::class, 'index'])->name('pegawai.homepage');
     Route::get('/profil', [PegawaiController::class, 'profile'])->name('pegawai.profil');
     Route::get('/password', [PegawaiController::class, 'password'])->name('pegawai.password');
@@ -52,7 +52,7 @@ Route::middleware(['auth', ])->group(function () {
     Route::patch('/profil/password', [PegawaiController::class, 'updatePassword'])->name('profile.password.update');
     Route::get('/notifikasi', [PegawaiController::class, 'notification'])->name('pegawai.notifikasi');
     Route::get('/notifikasi/{notification}', [PegawaiController::class, 'notificationShow'])->name('pegawai.notifikasi.show');
-    Route::patch('/notifikasi/{notification}', [PegawaiController::class, 'notificationUpdate'])->name('pegawai.notifikasi.update');
+    Route::patch('/notifikasi/{notification}', [PegawaiController::class, 'notificationUpdate'])->name('pegawai.notifikasi.update')->middleware('throttle:pengaduan_sampah');
 
     Route::post('/pegawai/2fa/enable', [PegawaiController::class, 'enable2fa'])->name('pegawai.2fa.enable');
     Route::delete('/pegawai/2fa/disable', [PegawaiController::class, 'disable2fa'])->name('pegawai.2fa.disable');

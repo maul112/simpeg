@@ -32,12 +32,12 @@
                 </div>
 
                 <div>
-                    <flux:subheading>Pendidikan Terakhir</flux:subheading>
+                    <flux:subheading class="dark:text-white">Pendidikan Terakhir</flux:subheading>
 
                     <flux:heading size="lg">
                         {{ $employee->education_level ?? '-' }}
                         @if($employee->education_detail)
-                            <span class="text-sm font-normal text-zinc-500">
+                            <span class="text-sm font-normal text-zinc-500 dark:text-white">
                                 / ({{ $employee->education_detail }})
                             </span>
                         @endif
@@ -54,7 +54,7 @@
                     <flux:icon.clock class="w-7 h-7" />
                 </div>
                 <div>
-                    <flux:subheading>Masa Kerja</flux:subheading>
+                    <flux:subheading class="dark:text-white">Masa Kerja</flux:subheading>
                     <flux:heading size="lg">{{ $masaKerja }}</flux:heading>
                 </div>
             </flux:card>
@@ -65,22 +65,22 @@
                     <flux:icon.bell class="w-7 h-7" />
                 </div>
                 <div>
-                    <flux:subheading>Pesan Belum Dibaca</flux:subheading>
+                    <flux:subheading class="dark:text-white">Pesan Belum Dibaca</flux:subheading>
                     <flux:heading size="lg">{{ $globalUnreadCount ?? 0 }} <span
-                            class="text-sm font-normal text-zinc-500">Pesan</span></flux:heading>
+                            class="text-sm font-normal text-zinc-500 dark:text-white">Pesan</span></flux:heading>
                 </div>
             </flux:card>
 
             {{-- Pintasan Aksi --}}
             <flux:card
-                class="flex items-center gap-4 p-6! border-t-4 border-t-blue-500 cursor-pointer hover:bg-zinc-50 transition"
+                class="flex items-center gap-4 p-6! border-t-4 border-t-blue-500 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition"
                 onclick="window.location.href='{{ route('notifikasi.index') }}'">
                 <div class="bg-blue-50 text-blue-600 p-3 rounded-full dark:bg-blue-900/30">
                     <flux:icon.envelope-open class="w-7 h-7" />
                 </div>
                 <div>
-                    <flux:subheading>Kotak Masuk</flux:subheading>
-                    <flux:heading size="md" class="text-blue-600">Buka Notifikasi &rarr;</flux:heading>
+                    <flux:subheading class="dark:text-white">Kotak Masuk</flux:subheading>
+                    <flux:heading size="md" class="text-blue-600 dark:text-white">Buka Notifikasi &rarr;</flux:heading>
                 </div>
             </flux:card>
         </div>

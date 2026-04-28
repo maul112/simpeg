@@ -237,7 +237,7 @@ class EmployeeController extends Controller
 
     public function export(Request $request) {
         return Excel::download(
-            new EmployeesExport($request->only(['search','rank_grade_id'])), 'pegawai.xlsx'
+            new EmployeesExport($request->only(['education_level', 'gender', 'rank_grade_id'])), 'pegawai.xlsx'
         );
     }
 }

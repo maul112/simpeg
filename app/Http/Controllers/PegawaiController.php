@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
+use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Exp;
 
 class PegawaiController extends Controller
 {
@@ -154,6 +156,11 @@ class PegawaiController extends Controller
 
     public function notificationShow(Notification $notification)
     {
+        if (!$notification->is_read) {
+            $notification->is_read = true;
+            $notification->save();
+        }
+
         if ($notification->type != 'pangkat') {
             return redirect()->route('pegawai.notifikasi')->with('error', 'Notifikasi ini tidak dapat dibuka.');
         }
@@ -174,10 +181,10 @@ class PegawaiController extends Controller
 
         $request->validate([
             // Hanya izinkan PDF atau Gambar, maksimal 5MB
-            'sk_file' => 'required|mimes:pdf,jpg,jpeg,png|max:5120', 
+            'sk_file' => 'required|mimes:pdf|max:5120',
         ], [
             'sk_file.required' => 'Anda harus memilih file terlebih dahulu.',
-            'sk_file.mimes' => 'Format file harus PDF, JPG, atau PNG.',
+            'sk_file.mimes' => 'Format file harus PDF.',
         ]);
 
         // Hapus file lama jika pegawai mengunggah ulang (opsional, agar storage tidak penuh)
@@ -191,8 +198,9 @@ class PegawaiController extends Controller
         $notification->update([
             'sk_file_path' => $path,
             'submitted_at' => now(),
+            'status' => 'pending',
             'is_read' => true,
         ]);
-        return back()->with('status', 'Berkas SK berhasil diunggah dan dikirim ke sistem dan notifikasi ditandai sudah dibaca.');
+        return back()->with('success', 'Berkas SK berhasil diunggah dan dikirim ke sistem dan notifikasi ditandai sudah dibaca.');
     }
 }

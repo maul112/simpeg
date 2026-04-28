@@ -16,7 +16,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             RankGradeSeeder::class,
-            PositionSeeder::class
+            PositionSeeder::class,
+            EducationSeeder::class,
+            TmtKgbSeeder::class
         ]);
     }
 }

@@ -98,17 +98,15 @@ class NotificationController extends Controller
         return view('admin.notifikasi.edit', compact('notifikasi', 'employees'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Notification $notifikasi)
     {
         $rules = [
-            'employee_id' => 'required|exists:employees,id',
-            'type'        => 'required|string|max:50',
-            'title'       => 'required|string|max:255',
-            'message'     => 'required|string',
-            'is_read'     => 'required|boolean', // Tambahan untuk edit status baca
+            // 'employee_id' => 'required|exists:employees,id',
+            // 'type'        => 'required|string|max:50',
+            // 'title'       => 'required|string|max:255',
+            'status'      => 'nullable|in:pending,approved,rejected',
+            // 'message'     => 'required|string',
+            'is_read'     => 'required|boolean',
         ];
 
         $messages = [
@@ -119,7 +117,7 @@ class NotificationController extends Controller
 
         $notifikasi->update($validatedData);
 
-        return redirect()->route('admin.notifikasi.index')->with('success', 'Data notifikasi berhasil diperbarui.');
+        return redirect()->route('notifikasi.index')->with('success', 'Data notifikasi berhasil diperbarui.');
     }
 
     /**

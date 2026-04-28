@@ -32,6 +32,7 @@ class NotificationService
     public function checkAndGenerateNotifications($users)
     {
         $now = Carbon::parse(now())->startOfDay();
+        // dd($now . "notif");
         // $debugNotif = [];
 
         // 1. Kumpulkan semua ID Pegawai yang valid
@@ -45,7 +46,6 @@ class NotificationService
         // 2. QUERY OPTIMIZATION: Tarik SEMUA notifikasi tahun ini hanya dengan 1 Query
         // Gunakan get() dan pilih kolom yang diperlukan saja agar hemat memori RAM
         $existingNotifications = Notification::whereIn('employee_id', $employeeIds)
-            ->whereYear('created_at', $now->year)
             ->get(['employee_id', 'type', 'title']);
 
         // 3. Susun data ke array multidimensi untuk pencarian kilat (O(1) Lookup)
@@ -58,9 +58,12 @@ class NotificationService
         foreach ($users as $user) {
             $employee = $user->employee;
             if (!$employee) continue;
+            if ($employee->nip == "197002052003121004") {
+                continue;
+            }
 
             foreach ($this->typeSchedules as $type => $schedules) {
-                
+
                 $targetDate = $this->calculateTargetDate($employee, $type, $now);
 
                 if (!$targetDate || $now->greaterThanOrEqualTo($targetDate)) {
@@ -68,6 +71,11 @@ class NotificationService
                 }
 
                 foreach ($schedules as $schedule) {
+
+                    if($employee->nip == "197304151998032009") {
+                        // dump($schedule);
+                        // dump($employee->nip);
+                    }
                     
                     $triggerDate = $targetDate->copy()->{$schedule['method']}($schedule['value']);
 
@@ -75,12 +83,11 @@ class NotificationService
                         
                         // 4. KUNCI GEMBOK (OPTIMIZED): Cek langsung dari array di memori
                         $alreadyNotified = false;
-                        $searchKeyword = 'H-' . $schedule['label'];
+                        $searchKeyword = $targetDate->format('Y-m-d');
 
                         // Pastikan key array ada sebelum di-loop untuk menghindari Error Undefined Array Key
                         if (isset($notifCache[$employee->id][$type])) {
                             foreach ($notifCache[$employee->id][$type] as $existingTitle) {
-                                // str_contains adalah bawaan PHP 8, berfungsi seperti LIKE '%keyword%' di SQL
                                 if (str_contains($existingTitle, $searchKeyword)) {
                                     $alreadyNotified = true;
                                     break;
@@ -97,14 +104,24 @@ class NotificationService
                             //     'tanggal_trigger' => $triggerDate->format('d M Y'),
                             // ];
 
-                            // 5. Buat Notifikasi Baru
-                            $newTitle = 'Peringatan H-' . $schedule['label'] . ' ' . Str::headline($type);
+                            $newTitle = 'Peringatan H-' . $schedule['label'] . ' ' . Str::headline($type) . ' (pada ' . $targetDate->format('Y-m-d') . ')';
 
                             $needsSK = $this->promotionService->needsSK($employee);
+                            
+                            $existingSK = Notification::where('employee_id', $employee->id)
+                                ->where('type', 'pangkat')
+                                ->whereIn('status', ['pending','rejected'])
+                                ->exists();
+
+                            if ($type === 'pangkat' && $needsSK && $existingSK) {
+                                continue;
+                            }
+
                             $status = null;
                             if ($type === 'pangkat' && $needsSK) {
                                 $status = 'pending';
                             }
+
                             Notification::create([
                                 'employee_id' => $employee->id,
                                 'type'        => $type,
@@ -112,9 +129,6 @@ class NotificationService
                                 'message'     => "Sistem mendeteksi jadwal " . Str::headline($type) . " untuk {$employee->name} jatuh pada " . $targetDate->format('d M Y') . ". Mohon segera persiapkan berkas yang dibutuhkan.",
                                 'status'      => $status,
                             ]);
-
-                            // 6. PENTING: Masukkan notifikasi yang baru dibuat ini ke dalam array cache
-                            // Ini untuk mencegah notifikasi terkirim dua kali jika loop berjalan lebih dari sekali untuk pegawai yang sama
                             $notifCache[$employee->id][$type][] = $newTitle;
                         }
                     }
@@ -142,8 +156,8 @@ class NotificationService
                 
             case 'gaji_berkala':
                 // Kelipatan 2 Tahun dari TMT
-                if (!$employee->tmt_start) return null;
-                $tmt = Carbon::parse($employee->tmt_start)->startOfDay();
+                if (!$employee->tmt_kgb) return null;
+                $tmt = Carbon::parse($employee->tmt_kgb)->startOfDay();
                 $yearsElapsed = $tmt->floatDiffInYears($now);
                 
                 $nextCycle = ceil($yearsElapsed / 2) * 2;
@@ -155,8 +169,7 @@ class NotificationService
                 if (!$employee->birth_date) return null;
                 
                 $bday = Carbon::parse($employee->birth_date)->startOfDay();
-                $umurPensiun = 60; // Batas Usia Pensiun (BUP)
-                
+                $umurPensiun = 60;
                 return $bday->copy()->addYears($umurPensiun);
 
             default:

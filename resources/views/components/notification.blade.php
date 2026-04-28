@@ -1,6 +1,6 @@
 <div
     class="relative p-5 border rounded-xl flex flex-col sm:flex-row gap-4 sm:items-center transition-all 
-                                                                                            {{ $notif->is_read ? 'bg-white border-zinc-200' : 'bg-emerald-50/40 border-emerald-200 shadow-sm' }}">
+                                                                                            {{ $notif->is_read ? 'bg-white dark:bg-zinc-800 border-zinc-200' : 'bg-emerald-50/40 border-emerald-200 shadow-sm' }}">
 
     {{-- Indikator Titik Biru untuk pesan yang belum dibaca --}}
     @if(!$notif->is_read)
@@ -10,20 +10,29 @@
     <div class="flex-1">
         {{-- Badge Tipe & Waktu --}}
         <div class="flex items-center gap-2 mb-1.5">
-            <flux:badge size="sm" color="{{ $notif->is_read ? 'zinc' : 'emerald' }}">
+            <flux:badge size="sm" color="{{ $notif->is_read ? 'zinc' : 'emerald' }}" class="dark:text-white">
                 {{ Str::headline($notif->type) }}
             </flux:badge>
             {{-- Mengubah timestamp menjadi format ramah seperti "2 jam yang lalu" --}}
-            <span class="text-xs {{ $notif->is_read ? 'text-zinc-500' : 'text-emerald-600 font-medium' }}">
+            <span class="text-xs dark:text-white {{ $notif->is_read ? 'text-zinc-500' : 'text-emerald-600 font-medium' }}">
                 {{ $notif->created_at->diffForHumans() }}
             </span>
         </div>
 
         {{-- Judul & Pesan --}}
-        <h3 class="text-base font-semibold {{ $notif->is_read ? 'text-zinc-800' : 'text-emerald-900' }}">
+        <h3 class="text-base font-semibold dark:text-white {{ $notif->is_read ? 'text-zinc-800' : 'text-emerald-900' }}">
             {{ $notif->title }}
+            @if ($notif->type == 'pangkat' && $notif->status != null)
+                @if ($notif->status == 'pending')
+                    (Pending)
+                @elseif ($notif->status == 'approved')
+                    (Disetujui)
+                @else
+                    (Ditolak)
+                @endif
+            @endif
         </h3>
-        <p class="text-sm mt-1 {{ $notif->is_read ? 'text-zinc-600' : 'text-emerald-800' }}">
+        <p class="text-sm mt-1 dark:text-white {{ $notif->is_read ? 'text-zinc-600' : 'text-emerald-800' }}">
             {{ $notif->message }}
         </p>
     </div>

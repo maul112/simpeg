@@ -132,7 +132,7 @@
 
                 {{-- Footer / Action Buttons --}}
                 <div class="flex items-center justify-end gap-3 pt-4 border-t">
-                    <flux:button href="{{ route('pegawai.index') }}" variant="subtle" wire:navigate>
+                    <flux:button onclick="window.history.back()" variant="subtle" wire:navigate>
                         Batal
                     </flux:button>
 

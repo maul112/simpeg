@@ -16,39 +16,61 @@ class PromotionService
             if ($employee->nip == "197002052003121004") {
                 continue;
             }
+            // dump($employee->name);
+            // dump($this->isEligibleByTime($employee));
             if (!$this->isEligibleByTime($employee)) {
                 continue;
             }
-            // dd($this->isEligibleByTime($employee));
             $nextRank = $this->getNextRank($employee->rank_grade_id);
+            // dump($nextRank);
             if (!$nextRank) {
                 continue;
             }
-            // dd($this->requiresSK($employee, $employee->rank_grade_id, $nextRank));
-            // 🚫 butuh SK → skip
-            if ($this->requiresSK($employee, $employee->rank_grade_id, $nextRank)) {
-                $approved = Notification::where('employee_id', $employee->id)
-                    ->where('type', 'pangkat')
-                    ->latest()
-                    ->value('status') === 'approved';
 
+            $nextGol = $this->getGolongan($nextRank);
+            // dump($this->canPromote($employee, $nextGol));
+            if (!$this->canPromote($employee, $nextGol)) {
+                continue;
+            }
+
+            // dump($this->requiresSK($employee, $employee->rank_grade_id, $nextRank));
+            if ($this->requiresSK($employee, $employee->rank_grade_id, $nextRank)) {
+                $targetDate = $this->getTargetDate($employee);
+                $targetKey = $targetDate?->format('Y-m-d');
+                $latestSK = Notification::where('employee_id', $employee->id)
+                    ->where('type', 'pangkat')
+                    ->where('title', 'like', "%{$targetKey}%")
+                    ->latest()
+                    ->first();
+                $approved = $latestSK && $latestSK->status === 'approved';
+                // dump($approved);
                 if (!$approved) {
                     continue;
                 }
             }
+            // dd($employee->name);
 
-            // ✅ auto promote
             $this->promote($employee, $nextRank);
         }
     }
 
     private function isEligibleByTime($employee)
     {
-        if (!$employee->tmt_start) return false;
+        $targetDate = $this->getTargetDate($employee);
 
-        return Carbon::parse($employee->tmt_start)
-            ->addYears(4)
-            ->lte(now());
+        if (!$targetDate) return false;
+
+        $now = Carbon::parse("2016-04-28")->startOfDay();
+
+        if (!$now->gte($targetDate)) {
+            return false;
+        }
+        if ($employee->last_promoted_at &&
+            Carbon::parse($employee->last_promoted_at)->gte($targetDate)) {
+            return false;
+        }
+
+        return true;
     }
 
     private function getNextRank($currentId)
@@ -76,23 +98,21 @@ class PromotionService
     {
         $currentGol = $this->getGolongan($currentId);
         $nextGol = $this->getGolongan($nextId);
+        return $currentGol !== $nextGol;
+    }
 
-        // masih dalam golongan sama → aman
-        if ($currentGol === $nextGol) {
-            return false;
-        }
-
+    private function canPromote($employee, $nextGol)
+    {
         $level = $employee->education_level;
 
-        // syarat minimal untuk masuk golongan berikutnya
-        $minRequirement = match ($nextGol) {
+        $rules = [
+            1 => ['SD','SMP'],
             2 => ['SMA','D1','D2','D3','D4','S1','S2','S3'],
             3 => ['D4','S1','S2','S3'],
-            4 => ['S2','S3'],
-            default => ['SD','SMP'],
-        };
+            4 => ['S2','S3'], // 🔴 ini yang bikin S1 tidak bisa ke IV
+        ];
 
-        return !in_array($level, $minRequirement);
+        return in_array($level, $rules[$nextGol] ?? []);
     }
 
     public function needsSK($employee)
@@ -108,7 +128,7 @@ class PromotionService
     {
         $employee->update([
             'rank_grade_id' => $nextRankId,
-            'tmt_start' => now(), // reset masa kerja
+            'last_promoted_at' => now(),
         ]);
     }
 
@@ -120,5 +140,23 @@ class PromotionService
             $rankId >= 3  => 3, // III
             default       => 4, // IV
         };
+    }
+
+    public function getTargetDate($employee)
+    {
+        if (!$employee->tmt_start) return null;
+
+        $tmt = Carbon::parse($employee->tmt_start)->startOfDay();
+        $now = Carbon::parse("2016-04-28")->startOfDay();
+
+        $yearsElapsed = $tmt->floatDiffInYears($now);
+
+        $nextCycle = ceil($yearsElapsed / 4) * 4;
+
+        if ($nextCycle == 0) {
+            $nextCycle = 4;
+        }
+
+        return $tmt->copy()->addYears($nextCycle);
     }
 }

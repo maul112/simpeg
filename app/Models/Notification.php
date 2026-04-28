@@ -11,6 +11,7 @@ class Notification extends Model
         'type',
         'title',
         'message',
+        'status',
         'sk_file_path',
         'submitted_at',
         'is_read',

@@ -17,6 +17,7 @@ class Employee extends Model
         'tmt_start',
         'tmt_end',
         'tmt_kgb',
+        'last_promoted_at',
         'type',
         'position_id',
         'rank_grade_id',

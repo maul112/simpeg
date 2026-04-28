@@ -25,14 +25,6 @@
         </div>
     </flux:card>
 
-    {{-- Alert Sukses (Menggunakan Alpine.js yang sudah kita pelajari) --}}
-    @if (session('success'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition
-            class="mt-4 p-3 bg-green-50 text-emerald-700 rounded-lg text-sm border border-green-200">
-            {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Daftar Notifikasi --}}
     <div class="mt-6 space-y-4">
         @forelse($notifications as $notif)
@@ -50,8 +42,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <p class="font-medium">Belum ada notifikasi.</p>
-                <p class="text-sm mt-1">Anda sudah membaca semua pembaruan sistem.</p>
+                <p class="font-medium dark:text-white">Belum ada notifikasi.</p>
+                <p class="text-sm mt-1 dark:text-white">Anda sudah membaca semua pembaruan sistem.</p>
             </div>
         @endforelse
     </div>

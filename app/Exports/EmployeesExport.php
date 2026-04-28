@@ -4,9 +4,10 @@ namespace App\Exports;
 
 use App\Models\Employee;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class EmployeesExport implements FromCollection, WithHeadings
+class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
     protected $filters;
 
@@ -26,6 +27,8 @@ class EmployeesExport implements FromCollection, WithHeadings
         //           ->orWhere('nip', 'like', '%' . $this->filters['search'] . '%');
         //     });
         // }
+
+        // dd($this->filters);
 
         if (!empty($this->filters['rank_grade_id'])) {
             $query->where('rank_grade_id', $this->filters['rank_grade_id']);
