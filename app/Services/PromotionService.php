@@ -13,9 +13,9 @@ class PromotionService
     {
         $employees = Employee::get();
         foreach ($employees as $employee) {
-            if ($employee->nip == "197002052003121004") {
-                continue;
-            }
+            // if ($employee->nip == "197002052003121004") {
+            //     continue;
+            // }
             // dump($employee->name);
             // dump($this->isEligibleByTime($employee));
             if (!$this->isEligibleByTime($employee)) {

@@ -1,4 +1,5 @@
 <x-layouts::app :title="__('Kirim Notifikasi')">
+    <x-floating-managed-message />
     <div class="p-6 space-y-6">
         <flux:card>
             <div class="mb-6">
@@ -25,9 +26,6 @@
                     <option value="gaji_berkala" {{ old('type') == 'gaji_berkala' ? 'selected' : '' }}>Kenaikan Gaji
                         Berkala</option>
                     <option value="pensiun" {{ old('type') == 'pensiun' ? 'selected' : '' }}>Persiapan Pensiun</option>
-                    <option value="pengumuman" {{ old('type') == 'pengumuman' ? 'selected' : '' }}>Pengumuman Umum
-                    </option>
-                    <option value="peringatan" {{ old('type') == 'peringatan' ? 'selected' : '' }}>Peringatan / SP
                     </option>
                 </flux:select>
 
@@ -37,10 +35,22 @@
                 <flux:textarea name="message" label="Isi Pesan Detail" rows="4"
                     placeholder="Tulis instruksi lengkap di sini..." required>{{ old('message') }}</flux:textarea>
 
+                <div class="flex items-center gap-6">
+                    <div>
+                        <flux:subheading class="dark:text-white">Butuh Persetujuan (SK)?</flux:subheading>
+                        <p class="text-xs text-zinc-500 dark:text-white">Aktifkan jika notifikasi memerlukan upload SK (status: pending)
+                        </p>
+                    </div>
+                    <flux:field variant="inline">
+                        <flux:switch name="requires_sk" value="0" {{ old('requires_sk') ? 'checked' : '' }} />
+                    </flux:field>
+                </div>
+
                 <div class="flex items-center justify-end gap-3 pt-4 border-t">
                     <flux:button href="{{ route('notifikasi.index') }}" variant="subtle" wire:navigate>Batal
                     </flux:button>
-                    <flux:button type="submit" variant="primary" color="emerald">Kirim Notifikasi Sekarang</flux:button>
+                    <flux:button type="submit" variant="primary" color="emerald" class="cursor-pointer">Kirim Notifikasi
+                        Sekarang</flux:button>
                 </div>
             </form>
         </flux:card>

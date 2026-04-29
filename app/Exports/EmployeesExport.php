@@ -9,9 +9,9 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
-    protected $filters;
+    protected array $filters;
 
-    public function __construct($filters = [])
+    public function __construct(array $filters = [])
     {
         $this->filters = $filters;
     }
@@ -19,16 +19,6 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize
     public function collection()
     {
         $query = Employee::query();
-
-        // 🔍 APPLY FILTER (penting!)
-        // if (!empty($this->filters['search'])) {
-        //     $query->where(function ($q) {
-        //         $q->where('name', 'like', '%' . $this->filters['search'] . '%')
-        //           ->orWhere('nip', 'like', '%' . $this->filters['search'] . '%');
-        //     });
-        // }
-
-        // dd($this->filters);
 
         if (!empty($this->filters['rank_grade_id'])) {
             $query->where('rank_grade_id', $this->filters['rank_grade_id']);

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->enum('role', ['admin_simpeg', 'admin_sampah'])->default('admin_simpeg');
+            $table->enum('role', ['admin_simpeg', 'admin_sampah', 'pegawai'])->default('pegawai');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->foreignId('employee_id')

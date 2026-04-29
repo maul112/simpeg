@@ -20,6 +20,8 @@ class EmployeeController extends Controller
     {
         $search = $request->input('search');
         $rank_grade_id = $request->input('rank_grade_id');
+        $education_level = $request->input('education_level');
+        $gender = $request->input('gender');
         $rankGrades = RankGrade::orderBy('created_at', 'asc')->get();
         $employees = Employee::query()
             ->with(['rankGrade'])
@@ -30,8 +32,13 @@ class EmployeeController extends Controller
                 });
             })
             ->when($rank_grade_id, function ($query, $rank_grade_id) {
-                // Filter berdasarkan rank_grade_id jika user memilih pangkat
                 return $query->where('rank_grade_id', $rank_grade_id);
+            })
+            ->when($education_level, function ($query, $education_level) {
+                return $query->where('education_level', $education_level);
+            })
+            ->when($gender, function ($query, $gender) {
+                return $query->where('gender', $gender);
             })
             ->latest()
             ->paginate(10)
@@ -105,6 +112,7 @@ class EmployeeController extends Controller
 
         // 4. Eksekusi Validasi
         $validatedData = $request->validate($rules, $messages, $attributes);
+        $validatedData['last_promoted_at'] = $validatedData['tmt_start'];
 
         // 5. Simpan Data (Gunakan DB Transaction karena ada 2 tabel)
         DB::transaction(function () use ($validatedData) {
@@ -120,13 +128,15 @@ class EmployeeController extends Controller
                 'tmt_end'       => $validatedData['tmt_end'] ?? null,
                 'tmt_kgb'       => $validatedData['tmt_kgb'],
                 'type'          => $validatedData['type'],
+                'last_promoted_at' => $validatedData['last_promoted_at'] ?? null,
                 'position_id'   => $validatedData['position_id'] ?? null,
                 'rank_grade_id' => $validatedData['rank_grade_id'] ?? null,
             ]);
 
             User::create([
+                'name'          => $validatedData['name'],
                 'employee_id'   => $employee->id,
-                'email'         => "{$employee->nip}@email.com",
+                'email'         => "{$employee->nip}@gmail.com",
                 'password'      => bcrypt($employee->nip),
             ]);
         });
@@ -236,8 +246,13 @@ class EmployeeController extends Controller
     }
 
     public function export(Request $request) {
+        $filters = array_filter($request->only([
+            'education_level',
+            'gender',
+            'rank_grade_id'
+        ]));
         return Excel::download(
-            new EmployeesExport($request->only(['education_level', 'gender', 'rank_grade_id'])), 'pegawai.xlsx'
+            new EmployeesExport($filters), 'pegawai.xlsx'
         );
     }
 }

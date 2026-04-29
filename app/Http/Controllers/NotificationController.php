@@ -55,8 +55,8 @@ class NotificationController extends Controller
         $rules = [
             'employee_id' => 'required|exists:employees,id',
             'type'        => 'required|string|max:50',
-            'title'       => 'required|string|max:255',
             'message'     => 'required|string',
+            'requires_sk' => 'nullable|boolean',
         ];
 
         $messages = [
@@ -67,18 +67,30 @@ class NotificationController extends Controller
         $attributes = [
             'employee_id' => 'Pegawai Penerima',
             'type'        => 'Jenis Notifikasi',
-            'title'       => 'Judul Pesan',
             'message'     => 'Isi Pesan',
         ];
 
-        $validatedData = $request->validate($rules, $messages, $attributes);
+        $validated = $request->validate($rules, $messages, $attributes);
 
-        // Set default is_read = false (0) saat dibuat manual
-        $validatedData['is_read'] = false;
+        $status = $request->has('requires_sk') ? 'pending' : null;
 
-        Notification::create($validatedData);
+        $typeLabel = str_replace('_', ' ', $validated['type']);
+        $typeLabel = ucwords($typeLabel);
+        $now = now();
+        $title = "Peringatan {$typeLabel} ({$now->format('Y-m-d')})";
 
-        return redirect()->route('admin.notifikasi.index')->with('success', 'Notifikasi berhasil dikirim ke pegawai.');
+        Notification::create([
+            'employee_id' => $validated['employee_id'],
+            'type'        => $validated['type'],
+            'title'       => $title,
+            'message'     => $validated['message'],
+            'status'      => $status,
+            'is_read'     => false,
+        ]);
+
+        return redirect()
+            ->route('notifikasi.index')
+            ->with('success', 'Notifikasi berhasil dikirim ke pegawai.');
     }
 
     /**
@@ -127,6 +139,6 @@ class NotificationController extends Controller
     {
         $notifikasi->delete();
 
-        return redirect()->route('admin.notifikasi.index')->with('success', 'Notifikasi berhasil dihapus.');
+        return redirect()->route('notifikasi.index')->with('success', 'Notifikasi berhasil dihapus.');
     }
 }

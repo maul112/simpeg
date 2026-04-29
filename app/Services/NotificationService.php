@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Employee;
 use Illuminate\Support\Carbon;
 use App\Models\Notification;
 use Illuminate\Support\Str;
@@ -58,9 +59,9 @@ class NotificationService
         foreach ($users as $user) {
             $employee = $user->employee;
             if (!$employee) continue;
-            if ($employee->nip == "197002052003121004") {
-                continue;
-            }
+            // if ($employee->nip == "197002052003121004") {
+            //     continue;
+            // }
 
             foreach ($this->typeSchedules as $type => $schedules) {
 
@@ -72,10 +73,10 @@ class NotificationService
 
                 foreach ($schedules as $schedule) {
 
-                    if($employee->nip == "197304151998032009") {
+                    // if($employee->nip == "197304151998032009") {
                         // dump($schedule);
                         // dump($employee->nip);
-                    }
+                    // }
                     
                     $triggerDate = $targetDate->copy()->{$schedule['method']}($schedule['value']);
 
@@ -141,7 +142,7 @@ class NotificationService
     /**
      * "OTAK" LOGIKA: Menghitung target tanggal berdasarkan aturan masing-masing tipe
      */
-    private function calculateTargetDate($employee, string $type, Carbon $now)
+    private function calculateTargetDate(Employee $employee, string $type, Carbon $now)
     {
         switch ($type) {
             case 'pangkat':
