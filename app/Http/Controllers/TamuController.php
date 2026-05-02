@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\User;
+use App\Services\KgbService;
 use App\Services\NotificationService;
 use App\Services\PromotionService;
 use Illuminate\Http\Request;
@@ -31,11 +32,12 @@ class TamuController extends Controller
         // return redirect()->route('tamu.index');
     }
 
-    public function create(NotificationService $notificationService, PromotionService $promotionService)
+    public function create(NotificationService $notificationService, PromotionService $promotionService, KgbService $kgbService)
     {
         $users = User::has('employee')->with('employee')->get();
         $notificationService->checkAndGenerateNotifications($users);
         $promotionService->process();
+        $kgbService->process();
         // if (count($result) > 0) {
         //     dd($result);
         // }

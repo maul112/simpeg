@@ -36,7 +36,8 @@ class TmtKgbSeeder extends Seeder
 
         foreach ($data as $date => $ids) {
             Employee::whereIn('id', $ids)->update([
-                'tmt_kgb' => $date
+                'tmt_kgb' => $date,
+                'tmt_kgb_updated_at' => $date,
             ]);
         }
     }

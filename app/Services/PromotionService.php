@@ -13,27 +13,19 @@ class PromotionService
     {
         $employees = Employee::get();
         foreach ($employees as $employee) {
-            // if ($employee->nip == "197002052003121004") {
-            //     continue;
-            // }
-            // dump($employee->name);
-            // dump($this->isEligibleByTime($employee));
             if (!$this->isEligibleByTime($employee)) {
                 continue;
             }
             $nextRank = $this->getNextRank($employee->rank_grade_id);
-            // dump($nextRank);
             if (!$nextRank) {
                 continue;
             }
 
             $nextGol = $this->getGolongan($nextRank);
-            // dump($this->canPromote($employee, $nextGol));
             if (!$this->canPromote($employee, $nextGol)) {
                 continue;
             }
 
-            // dump($this->requiresSK($employee, $employee->rank_grade_id, $nextRank));
             if ($this->requiresSK($employee, $employee->rank_grade_id, $nextRank)) {
                 $targetDate = $this->getTargetDate($employee);
                 $targetKey = $targetDate?->format('Y-m-d');
@@ -43,12 +35,10 @@ class PromotionService
                     ->latest()
                     ->first();
                 $approved = $latestSK && $latestSK->status === 'approved';
-                // dump($approved);
                 if (!$approved) {
                     continue;
                 }
             }
-            // dd($employee->name);
 
             $this->promote($employee, $nextRank);
         }
@@ -60,7 +50,7 @@ class PromotionService
 
         if (!$targetDate) return false;
 
-        $now = Carbon::parse("2016-04-28")->startOfDay();
+        $now = Carbon::parse(now())->startOfDay();
 
         if (!$now->gte($targetDate)) {
             return false;
@@ -147,7 +137,7 @@ class PromotionService
         if (!$employee->tmt_start) return null;
 
         $tmt = Carbon::parse($employee->tmt_start)->startOfDay();
-        $now = Carbon::parse("2016-04-28")->startOfDay();
+        $now = Carbon::parse(now())->startOfDay();
 
         $yearsElapsed = $tmt->floatDiffInYears($now);
 

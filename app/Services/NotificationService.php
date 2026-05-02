@@ -59,9 +59,6 @@ class NotificationService
         foreach ($users as $user) {
             $employee = $user->employee;
             if (!$employee) continue;
-            // if ($employee->nip == "197002052003121004") {
-            //     continue;
-            // }
 
             foreach ($this->typeSchedules as $type => $schedules) {
 
@@ -73,16 +70,9 @@ class NotificationService
 
                 foreach ($schedules as $schedule) {
 
-                    // if($employee->nip == "197304151998032009") {
-                        // dump($schedule);
-                        // dump($employee->nip);
-                    // }
-                    
                     $triggerDate = $targetDate->copy()->{$schedule['method']}($schedule['value']);
-
                     if ($now->greaterThanOrEqualTo($triggerDate)) {
                         
-                        // 4. KUNCI GEMBOK (OPTIMIZED): Cek langsung dari array di memori
                         $alreadyNotified = false;
                         $searchKeyword = $targetDate->format('Y-m-d');
 

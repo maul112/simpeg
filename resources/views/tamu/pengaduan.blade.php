@@ -3,7 +3,12 @@
 
         {{-- Header Page --}}
         <div class="text-center mb-6">
-            <flux:icon.globe-americas class="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+            <div class="flex flex-col items-center justify-center text-center">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo DLH" class="h-32 w-auto object-contain mb-2">
+                <h1 class="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+                    Dinas Lingkungan Hidup
+                </h1>
+            </div>
             <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">Form Laporan Kebersihan</h1>
             <p class="mt-3 text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
                 Bantu kami menjaga kebersihan lingkungan. Lengkapi form di bawah ini untuk melaporkan tumpukan sampah
@@ -43,8 +48,10 @@
                     <div class="space-y-6">
                         <flux:select id="tipe_pegawai" name="tipe_sampah" label="Tipe Pegawai" required>
                             <option value="">Pilih Tipe Sampah...</option>
-                            <option value="organik" {{ old('tipe_sampah') == 'organik' ? 'selected' : '' }}>Organik</option>
-                            <option value="non_organik" {{ old('tipe_sampah') == 'non_organik' ? 'selected' : '' }}>Non Organik</option>
+                            <option value="organik" {{ old('tipe_sampah') == 'organik' ? 'selected' : '' }}>Organik
+                            </option>
+                            <option value="non_organik" {{ old('tipe_sampah') == 'non_organik' ? 'selected' : '' }}>Non
+                                Organik</option>
                         </flux:select>
                         <flux:textarea name="deskripsi" label="Deskripsi Kondisi" rows="4"
                             placeholder="Contoh: Terdapat tumpukan sampah rumah tangga yang menyumbat selokan di depan minimarket, baunya sangat menyengat..."
@@ -173,11 +180,16 @@
             }
 
             // Titik awal: Surabaya / Gresik (Bisa Anda ubah sesuai kebutuhan)
-            const defaultLat = -7.2504;
-            const defaultLng = 112.7688;
+            const defaultLat = -7.0477686;
+            const defaultLng = 112.7324695;
 
             // Inisialisasi Peta
-            const map = L.map('map').setView([defaultLat, defaultLng], 12);
+            const map = L.map('map', {
+                center: [defaultLat, defaultLng],  // Titik tengah peta
+                zoom: 16,                          // Jarak zoom
+                scrollWheelZoom: false,            // Mencegah peta ter-zoom saat scroll mouse
+                attributionControl: false          // Menghilangkan teks "Leaflet" di pojok bawah
+            });
 
             // Gunakan Tile dari OpenStreetMap (Gratis)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

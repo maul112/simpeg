@@ -5,8 +5,7 @@
 
         <nav class="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
             <div class="flex items-center gap-2">
-                {{-- Mengganti ikon shield dengan leaf (daun) untuk tema lingkungan --}}
-                <flux:icon.globe-americas class="text-emerald-600 w-8 h-8" />
+                <img src="{{ asset('images/logo.png') }}" alt="Logo DLH" class="h-14 w-auto object-contain" />
                 <span class="text-2xl font-bold tracking-tight dark:text-white">DLH <span
                         class="text-emerald-600">Care</span></span>
             </div>
@@ -65,25 +64,85 @@
                     <div
                         class="relative overflow-hidden aspect-video w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-emerald-100 dark:border-emerald-900/30 flex flex-col">
 
+                        {{-- Mockup Header Mac --}}
                         <div
-                            class="flex items-center gap-1.5 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-white/5">
+                            class="flex items-center gap-1.5 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-white/5 z-20">
                             <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
                             <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
                             <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
                         </div>
 
-                        <div class="flex-1 flex items-center justify-center bg-emerald-50/30 dark:bg-emerald-950/10">
-                            <div class="text-center space-y-3">
-                                {{-- Ikon disesuaikan jadi map-pin (lokasi) --}}
-                                <flux:icon.map-pin class="mx-auto text-emerald-600 w-12 h-12 opacity-80" />
-                                <p
-                                    class="text-emerald-700/50 dark:text-emerald-400/50 font-medium text-sm tracking-widest uppercase">
-                                    Peta Sebaran Lokasi Laporan
-                                </p>
+                        {{-- Container Peta --}}
+                        <div class="flex-1 relative z-10 bg-emerald-50/30 dark:bg-emerald-950/10">
+                            {{-- Elemen ini akan diubah menjadi peta oleh Leaflet --}}
+                            <div id="hero-map" class="absolute inset-0 w-full h-full"></div>
+
+                            {{-- Fallback jika JavaScript mati (Opsional) --}}
+                            <div id="map-loading"
+                                class="absolute inset-0 flex items-center justify-center bg-white dark:bg-zinc-900 pointer-events-none transition-opacity duration-500">
+                                <div class="text-center space-y-3">
+                                    <flux:icon.map-pin
+                                        class="mx-auto text-emerald-600 w-12 h-12 opacity-80 animate-bounce" />
+                                    <p
+                                        class="text-emerald-700/50 dark:text-emerald-400/50 font-medium text-sm tracking-widest uppercase">
+                                        Memuat Peta Lokasi...
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                    {{--
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> --}}
+                    {{--
+                    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> --}}
+
+                    <script>
+                        document.addEventListener("livewire:navigated", function () {
+                            const dlhBangkalanLat = -7.0477686; 
+                            const dlhBangkalanLng = 112.7324695;
+
+                            // Inisialisasi Peta
+                            const map = L.map('hero-map', {
+                                center: [dlhBangkalanLat, dlhBangkalanLng],
+                                zoom: 15,
+                                scrollWheelZoom: false, // Matikan scroll agar halaman tidak tersendat saat di-scroll
+                                zoomControl: false,     // Matikan tombol zoom (opsional, agar UI lebih bersih)
+                                attributionControl: false // <--- Tambahkan baris ini
+                            });
+
+                            // Layer Peta (OpenStreetMap)
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            }).addTo(map);
+
+                            // Tambahkan Marker Custom
+                            const customIcon = L.divIcon({
+                                className: 'custom-pin',
+                                html: `<div class="flex items-center justify-center w-8 h-8 bg-emerald-600 text-white rounded-full shadow-lg border-2 border-white dark:border-zinc-800">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                   </div>`,
+                                iconSize: [32, 32],
+                                iconAnchor: [16, 32]
+                            });
+
+                            L.marker([dlhBangkalanLat, dlhBangkalanLng], { icon: customIcon })
+                                .addTo(map)
+                                .bindPopup("<b>Dinas Lingkungan Hidup</b><br>Kabupaten Bangkalan.");
+
+                            // Hilangkan layar loading saat layer peta selesai dimuat
+                            map.whenReady(function () {
+                                setTimeout(() => {
+                                    const loader = document.getElementById('map-loading');
+                                    if (loader) {
+                                        loader.style.opacity = '0';
+                                        setTimeout(() => loader.remove(), 500); // Hapus dari DOM setelah animasi fade-out
+                                    }
+                                }, 300); // Beri jeda sedikit agar mulus
+                            });
+                        });
+                    </script>
             </div>
         </section>
 
@@ -142,7 +201,7 @@
             <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
                 <div class="col-span-2 space-y-6">
                     <div class="flex items-center gap-2 text-white">
-                        <flux:icon.globe-americas class="w-8 h-8 text-emerald-500" />
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo DLH" class="h-14 w-auto object-contain" />
                         <span class="text-2xl font-bold">DLH<span class="text-emerald-500">Care</span></span>
                     </div>
                     <p class="max-w-sm">Layanan pengaduan masyarakat resmi di bawah naungan Dinas Lingkungan Hidup,
@@ -151,9 +210,9 @@
                 <div class="space-y-4">
                     <h4 class="text-white font-bold">Tautan Cepat</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="hover:text-emerald-500">Cara Melapor</a></li>
-                        <li><a href="#" class="hover:text-emerald-500">FAQ / Bantuan</a></li>
-                        <li><a href="#" class="hover:text-emerald-500">Standar Pelayanan (SOP)</a></li>
+                        <li><a href="{{ route('pengaduan.create') }}" class="hover:text-emerald-500">Cara Melapor</a></li>
+                        {{-- <li><a href="#" class="hover:text-emerald-500">FAQ / Bantuan</a></li>
+                        <li><a href="#" class="hover:text-emerald-500">Standar Pelayanan (SOP)</a></li> --}}
                     </ul>
                 </div>
                 <div class="space-y-4">
@@ -161,7 +220,7 @@
                     <ul class="space-y-2 text-sm">
                         <li>pengaduan@dlh.bangkalankab.go.id</li>
                         <li>(031) 1234-5678</li>
-                        <li>Jl. Lingkungan Hijau No. 1, Bangkalan</li>
+                        <li>Jl. Soekarno Hatta No.32b, Wr 08, Mlajah, Kec. Bangkalan, Kabupaten Bangkalan, Jawa Timur 69116</li>
                     </ul>
                 </div>
             </div>
