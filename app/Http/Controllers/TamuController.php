@@ -9,6 +9,7 @@ use App\Services\NotificationService;
 use App\Services\PromotionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Str; // Import ini untuk membuat ID acak
 
 class TamuController extends Controller
 {
@@ -23,29 +24,19 @@ class TamuController extends Controller
         return view('pages.auth.register');
     }
 
-    public function masuk(Request $request)
-    {
-        // $name = $request->input('name');
-        // $address = $request->input('address');
-        // Cookie::queue('guest_name', $name, 1440);
-        // Cookie::queue('guest_address', $address, 1440);
-        // return redirect()->route('tamu.index');
-    }
-
     public function create(NotificationService $notificationService, PromotionService $promotionService, KgbService $kgbService)
     {
         $users = User::has('employee')->with('employee')->get();
         $notificationService->checkAndGenerateNotifications($users);
         $promotionService->process();
         $kgbService->process();
-        // if (count($result) > 0) {
-        //     dd($result);
-        // }
+        
         return view('tamu.pengaduan');
     }
 
     public function store(Request $request)
     {
+        // 1. Pengaturan Validasi
         $rules = [
             'nama_pelapor'  => 'required|string|max:255',
             'kontak'        => 'nullable|string|max:50',
@@ -58,13 +49,11 @@ class TamuController extends Controller
         ];
 
         $messages = [
-            'required'        => 'Kolom :attribute wajib diisi.',
-            'unique'          => ':attribute ini sudah dipakai orang lain.',
-            'digits'          => ':attribute harus berupa angka dan tepat :digits digit.',
-            'in'              => 'Pilihan pada kolom :attribute tidak valid.',
-            'image'           => 'Format :attribute harus berupa gambar.',
-            'mimes'           => 'Format :attribute harus berupa gambar.',
-            'latitude.required' => 'Titik kordinat peta wajib diisi.',
+            'required'           => 'Kolom :attribute wajib diisi.',
+            'in'                 => 'Pilihan pada kolom :attribute tidak valid.',
+            'image'              => 'Format :attribute harus berupa gambar.',
+            'mimes'              => 'Format :attribute harus berupa gambar.',
+            'latitude.required'  => 'Titik kordinat peta wajib diisi.',
             'longitude.required' => 'Titik kordinat peta wajib diisi.',
         ];
 
@@ -80,36 +69,48 @@ class TamuController extends Controller
         ];
 
         $validated = $request->validate($rules, $messages, $attributes);
-        // 1. Validasi Input
-        // $validated = $request->validate([
-        //     'nama_pelapor'  => 'required|string|max:255',
-        //     'kontak'        => 'nullable|string|max:50',
-        //     'deskripsi'     => 'nullable|string',
-        //     'tipe_sampah'   => 'required|in:organik,non_organik',
-        //     'lokasi_manual' => 'required|string',
-        //     'foto_bukti'    => 'required|image|mimes:jpeg,png,jpg|max:5120',
-        //     'latitude'      => 'required|numeric',
-        //     'longitude'     => 'required|numeric',
-        // ], [
-        //     'latitude.required' => 'Titik kordinat peta wajib diisi.',
-        //     'longitude.required' => 'Titik kordinat peta wajib diisi.',
-        // ]);
 
-        // 2. Proses Upload Foto (Simpan ke folder storage/app/public/pengaduan)
+        // 2. Generate Tracking ID (Contoh: PDAD-F4G2H1)
+        $tracking_id = 'PDAD-' . strtoupper(Str::random(6));
+        $validated['tracking_id'] = $tracking_id;
+
+        // 3. Proses Upload Foto
         if ($request->hasFile('foto_bukti')) {
             $path = $request->file('foto_bukti')->store('pengaduan', 'public');
             $validated['foto_bukti'] = $path;
         }
 
-        // 3. Simpan ke Database
+        // 4. Set Status Awal
+        $validated['status'] = 'pending';
+
+        // 5. Simpan ke Database
         Report::create($validated);
 
-        // 4. Kembali dengan Pesan Sukses
-        return redirect()->route('home')->with('success', 'Laporan Anda telah berhasil terkirim ke sistem DLHCare.');
+        // 6. Redirect dengan pesan sukses dan ID Tracking
+        return redirect()->route('home')->with([
+            'success' => 'Laporan Anda telah berhasil terkirim ke sistem DLHCare.',
+            'success_tracking' => $tracking_id
+        ]);
     }
 
     public function alurLapor() {
         return view('tamu.alur-lapor');
     }
-}
+    
+    // Fungsi baru untuk halaman Cek Status
  
+    public function cekStatus(Request $request)
+    {
+        // Mengambil semua laporan terbaru untuk feed publik
+        $allReports = Report::latest()->get();
+
+        // Jika user mencari ID tertentu, filter datanya
+        if ($request->filled('tracking_id')) {
+            $allReports = Report::where('tracking_id', 'LIKE', '%' . $request->tracking_id . '%')
+                                ->latest()
+                                ->get();
+        }
+
+        return view('tamu.cek-status', compact('allReports'));
+    }
+}

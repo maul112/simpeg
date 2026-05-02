@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Report extends Model
 {
     protected $fillable = [
+        'tracking_id', // Tambahkan baris ini
         'nama_pelapor',
         'kontak',
         'deskripsi',

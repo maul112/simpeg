@@ -12,7 +12,7 @@
             <div class="hidden md:flex items-center gap-8 text-sm font-medium">
                 <a href="{{ route('home') }}"
                     class="hover:text-emerald-600 transition-colors dark:text-white">Beranda</a>
-                <a href="#fitur" class="hover:text-emerald-600 transition-colors dark:text-white">Alur Lapor</a>
+                <a href="{{ route('cek.status') }}#alur-lapor" class="hover:text-emerald-600 transition-colors dark:text-white">Cek laporan</a>
                 <a href="#footer" class="hover:text-emerald-600 transition-colors dark:text-white">Tentang DLH</a>
 
                 @auth
@@ -56,7 +56,10 @@
                         <flux:button href="{{ route('pengaduan.create') }}" variant="primary"
                             class="bg-emerald-600 px-8 dark:text-white" wire:navigate>Buat Laporan Baru
                         </flux:button>
-                        {{-- <flux:button variant="ghost">Cek Status Laporan</flux:button> --}}
+                        {{-- Tambahkan ini --}}
+                        <flux:button href="{{ route('cek.status') }}" variant="ghost" class="border-emerald-600 text-emerald-600">
+                            Lihat Laporan Publik
+                        </flux:button>
                     </div>
                 </div>
                 <div class="relative">

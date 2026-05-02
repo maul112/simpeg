@@ -14,6 +14,7 @@ Route::view('/', 'welcome')->name('home');
 Route::get('/pengaduan', [TamuController::class, 'create'])->name('pengaduan.create');
 Route::post('/pengaduan', [TamuController::class, 'store'])->name('pengaduan.store')->middleware('throttle:pengaduan_sampah');
 Route::get('/alur-lapor', [TamuController::class, 'alurLapor'])->name('alur-lapor');
+Route::get('/cek-status', [TamuController::class, 'cekStatus'])->name('cek.status');
 // Route::get('/masuk', [TamuController::class, 'masukForm'])->name('tamu.masukForm');
 // Route::post('/masuk', [TamuController::class, 'masuk'])->name('tamu.masuk');
 
@@ -41,6 +42,8 @@ Route::middleware(['auth', 'admin', 'isAdminSampah'])->group(function () {
     Route::prefix("admin")->group(function () {
         Route::get('/pengaduan', [ReportController::class, 'index'])->name('admin.pengaduan.index');
         Route::patch('/pengaduan/{pengaduan}/status', [ReportController::class, 'updateStatus'])->name('admin.pengaduan.status');
+        // Tambahan route untuk hapus pengaduan
+        Route::delete('/pengaduan/{pengaduan}', [ReportController::class, 'destroy'])->name('admin.pengaduan.destroy');
     });
 });
     
