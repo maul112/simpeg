@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Notification;
 use App\Models\Report;
-
+use Illuminate\Support\Facades\Auth;
 class AdminController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         // dd($user->role);
 
         // ===================== ADMIN SIMPEG =====================
