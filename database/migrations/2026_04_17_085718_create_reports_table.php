@@ -13,15 +13,20 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
+            // TAMBAHKAN BARIS INI:
+            $table->string('tracking_id')->unique(); 
+            
             $table->string('nama_pelapor');
             $table->string('kontak')->nullable();
             $table->text('deskripsi')->nullable();
             $table->enum('tipe_sampah', ['organik', 'non_organik'])->default('organik');
             $table->text('lokasi_manual')->nullable();
             $table->string('foto_bukti');
-            // Menggunakan decimal untuk akurasi koordinat peta yang presisi
+            
+            // Koordinat Peta
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
+            
             $table->enum('status', ['pending', 'proses', 'selesai'])->default('pending');
             $table->timestamps();
         });

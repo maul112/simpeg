@@ -101,12 +101,13 @@ class TamuController extends Controller
  
     public function cekStatus(Request $request)
     {
-        // Mengambil semua laporan terbaru untuk feed publik
-        $allReports = Report::latest()->get();
+        // Mengambil semua laporan terbaru untuk feed publik, sekaligus menghitung jumlah komentar.
+        $allReports = Report::withCount('comments')->latest()->get();
 
-        // Jika user mencari ID tertentu, filter datanya
+        // Jika user mencari ID tertentu, filter datanya dan tetap hitung komentar.
         if ($request->filled('tracking_id')) {
-            $allReports = Report::where('tracking_id', 'LIKE', '%' . $request->tracking_id . '%')
+            $allReports = Report::withCount('comments')
+                                ->where('tracking_id', 'LIKE', '%' . $request->tracking_id . '%')
                                 ->latest()
                                 ->get();
         }

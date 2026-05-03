@@ -8,24 +8,37 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TamuController;
 use App\Livewire\PositionLive;
 use App\Livewire\RankGradeLive;
+use App\Models\Report;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+// --- AKSES PUBLIK (WARGA) ---
+
+// Route Home (Landing Page) - Sekarang bersih tanpa panggil data Report
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+// Route Tentang DLH (Isinya profil berbentuk teks)
+Route::get('/profil-dlh', function () {
+    return view('profil-dlh');
+})->name('profil.dlh');
+
 Route::get('/pengaduan', [TamuController::class, 'create'])->name('pengaduan.create');
 Route::post('/pengaduan', [TamuController::class, 'store'])->name('pengaduan.store')->middleware('throttle:pengaduan_sampah');
 Route::get('/alur-lapor', [TamuController::class, 'alurLapor'])->name('alur-lapor');
 Route::get('/cek-status', [TamuController::class, 'cekStatus'])->name('cek.status');
-// Route::get('/masuk', [TamuController::class, 'masukForm'])->name('tamu.masukForm');
-// Route::post('/masuk', [TamuController::class, 'masuk'])->name('tamu.masuk');
 
-// Route::middleware(['tamu.cek'])->group(function () {
-//     Route::get('/tamu', [TamuController::class, 'index'])->name('tamu.index');
-// });
+// Detail Pengaduan dipindah ke LUAR agar warga bisa lihat progress lewat link/ID Tracking
+Route::get('/admin/pengaduan/{pengaduan}', [ReportController::class, 'show'])->name('admin.pengaduan.show');
 
+
+// --- AKSES ADMIN (DASHBOARD UMUM) ---
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 });
 
+
+// --- KHUSUS ADMIN SIMPEG ---
 Route::middleware(['auth', 'admin', 'isAdminSimpeg'])->group(function () {
     Route::prefix("admin")->group(function () {
         Route::get('/pangkat', RankGradeLive::class)->name('pangkat.index');
@@ -38,15 +51,21 @@ Route::middleware(['auth', 'admin', 'isAdminSimpeg'])->group(function () {
     Route::get('/pegawai/pdf-pensiun', [EmployeeController::class, 'exportPdfPensiun'])->name('pegawai.pensiun.pdf');
 });
 
+
+// --- KHUSUS ADMIN SAMPAH (DLH CARE) ---
 Route::middleware(['auth', 'admin', 'isAdminSampah'])->group(function () {
     Route::prefix("admin")->group(function () {
         Route::get('/pengaduan', [ReportController::class, 'index'])->name('admin.pengaduan.index');
         Route::patch('/pengaduan/{pengaduan}/status', [ReportController::class, 'updateStatus'])->name('admin.pengaduan.status');
-        // Tambahan route untuk hapus pengaduan
         Route::delete('/pengaduan/{pengaduan}', [ReportController::class, 'destroy'])->name('admin.pengaduan.destroy');
+        
+        // Route Simpan Komentar Petugas
+        Route::post('/pengaduan/{pengaduan}/comment', [ReportController::class, 'storeComment'])->name('admin.pengaduan.comment');
     });
 });
+
     
+// --- AKSES PEGAWAI ---
 Route::middleware(['auth', 'isPegawai'])->group(function () {
     Route::get('/homepage', [PegawaiController::class, 'index'])->name('pegawai.homepage');
     Route::get('/profil', [PegawaiController::class, 'profile'])->name('pegawai.profil');
