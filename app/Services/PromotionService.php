@@ -38,25 +38,28 @@ class PromotionService
 
             $latestSK = Notification::where('employee_id', $employee->id)
                 ->where('type', 'pangkat')
-                ->whereBetween('created_at', [
-                    $targetDate->copy()->startOfDay(),
-                    $targetDate->copy()->endOfDay()
-                ])
+                ->where('title', 'like', '%' . $targetDate->format('Y-m-d') . '%')
                 ->latest()
                 ->first();
-
-            $approved = $latestSK && $latestSK->status === 'approved';
 
             // if ($employee->nip == "197002052003121005") {
                 // dd($approved);
             // }
 
-            if (!$approved) {
+            if ($latestSK !== null && $latestSK->status !== 'approved') {
+                $this->moveCycle($employee, $targetDate);
                 continue;
             }
 
             $this->promote($employee, $nextRank, $targetDate);
         }
+    }
+
+    private function moveCycle($employee, $targetDate)
+    {
+        $employee->update([
+            'tmt_start' => $targetDate
+        ]);
     }
 
     public function isEligibleByTime($employee)
