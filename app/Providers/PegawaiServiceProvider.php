@@ -32,8 +32,15 @@ class PegawaiServiceProvider extends ServiceProvider
             if (Auth::check()) {
                 $unreadCount = Notification::where('employee_id', Auth::user()->employee_id)
                     ->where('is_read', false)
+                    ->where(function ($q) {
+                        $q->where('type', '!=', 'pangkat')
+                        ->orWhere(function ($q2) {
+                            $q2->where('type', 'pangkat')
+                                ->whereNotNull('status');
+                        });
+                    })
                     ->count();
-                }
+            }
             $view->with('globalUnreadCount', $unreadCount);
         });
     }

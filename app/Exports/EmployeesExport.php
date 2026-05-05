@@ -34,6 +34,7 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize
 
         return $query->get()->map(function ($e) {
             return [
+                'NO' => $e->id,
                 'NAMA' => $e->name,
                 'NIP' => "'" . $e->nip,
                 'PANGKAT/GOL' => $e->rankGrade->rank_name . ' / ' . $e->rankGrade->grade_code,
@@ -47,6 +48,7 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize
     public function headings(): array
     {
         return [
+            'NO',
             'NAMA',
             'NIP',
             'PANGKAT/GOL',

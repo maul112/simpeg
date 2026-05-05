@@ -55,4 +55,14 @@ class AdminController extends Controller
         // fallback (optional)
         return view('dashboard');
     }
+
+    public function notificationSend(Notification $notification) {
+        if ($notification->type !== 'pangkat' || !is_null($notification->status)) {
+            abort(403, 'Tidak valid');
+        }
+        $notification->update([
+            'status' => 'pending'
+        ]);
+        return back()->with('success', 'Notifikasi berhasil dikirim.');
+    }
 }

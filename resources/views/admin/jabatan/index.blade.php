@@ -25,6 +25,7 @@
         <flux:table>
             <flux:table.columns>
                 <flux:table.column>Nama Jabatan</flux:table.column>
+                <flux:table.column>Tipe Jabatan</flux:table.column>
                 <flux:table.column>Jumlah Pegawai</flux:table.column>
                 <flux:table.column class="text-right">Aksi</flux:table.column>
             </flux:table.columns>
@@ -34,6 +35,10 @@
                     <flux:table.row wire:key="row-{{ $position->id }}">
                         <flux:table.cell>
                             {{ $position->position_name }}
+                        </flux:table.cell>
+
+                        <flux:table.cell>
+                            {{ $position->type }}
                         </flux:table.cell>
 
                         <flux:table.cell>

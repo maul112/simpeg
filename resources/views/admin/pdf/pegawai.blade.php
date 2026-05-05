@@ -18,7 +18,7 @@
             position: absolute;
             left: 0;
             top: 0;
-            width: 70px;
+            width: 100px;
         }
 
         .header h3,
@@ -102,7 +102,7 @@
 
     {{-- ================= HEADER ================= --}}
     <div class="header">
-        <img src="{{ public_path('logo.png') }}" class="logo">
+        <img src="{{ public_path('images/logo.png') }}" class="logo">
 
         <h3>PEMERINTAH KABUPATEN BANGKALAN</h3>
         <h4>DINAS LINGKUNGAN HIDUP</h4>

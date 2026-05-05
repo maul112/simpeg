@@ -54,8 +54,7 @@
                     <flux:table.column>Tipe</flux:table.column>
                     <flux:table.column>Judul Pesan</flux:table.column>
                     <flux:table.column>Status</flux:table.column>
-                    <flux:table.column>Tanggal</flux:table.column>
-                    <flux:table.column class="text-right">Aksi</flux:table.column>
+                    <flux:table.column>Aksi</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -69,7 +68,7 @@
                                 <flux:badge color="zinc">{{ Str::headline($notif->type) }}</flux:badge>
                             </flux:table.cell>
 
-                            <flux:table.cell>{{ $notif->title }}</flux:table.cell>
+                            <flux:table.cell>{{ Str::limit($notif->title, 20) }}</flux:table.cell>
 
                             <flux:table.cell>
                                 @if($notif->is_read)
@@ -79,9 +78,16 @@
                                 @endif
                             </flux:table.cell>
 
-                            <flux:table.cell>{{ $notif->created_at->format('d/m/Y H:i') }}</flux:table.cell>
-
                             <flux:table.cell class="flex justify-end gap-2">
+                                @if($notif->type === 'pangkat' && is_null($notif->status))
+                                    <form action="{{ route('notifikasi.send', $notif->id) }}" method="POST"
+                                        onsubmit="return confirm('Kirim notifikasi ini ke pegawai?')">
+                                        @csrf
+                                        <flux:button size="sm" color="blue" type="submit">
+                                            ✈ Kirim
+                                        </flux:button>
+                                    </form>
+                                @endif
                                 <flux:button size="sm" href="{{ route('notifikasi.edit', $notif->id) }}" wire:navigate>
                                     Edit
                                 </flux:button>

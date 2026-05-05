@@ -22,7 +22,7 @@ Route::get('/profil-dlh', function () {
     return view('profil-dlh');
 })->name('profil.dlh');
 
-Route::get('/pengaduan', [TamuController::class, 'create'])->name('pengaduan.create');
+Route::get('/pengaduan', [TamuController::class, 'create'])->name('pengaduan.create'); // trigger service
 Route::post('/pengaduan', [TamuController::class, 'store'])->name('pengaduan.store')->middleware('throttle:pengaduan_sampah');
 Route::get('/alur-lapor', [TamuController::class, 'alurLapor'])->name('alur-lapor');
 Route::get('/cek-status', [TamuController::class, 'cekStatus'])->name('cek.status');
@@ -33,7 +33,7 @@ Route::get('/pengaduan/{pengaduan}', [ReportController::class, 'show'])->name('a
 
 // --- AKSES ADMIN (DASHBOARD UMUM) ---
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard'); // trigger service
 });
 
 
@@ -44,10 +44,11 @@ Route::middleware(['auth', 'admin', 'isAdminSimpeg'])->group(function () {
         Route::get('/jabatan', PositionLive::class)->name('jabatan.index');
         Route::resource('pegawai', EmployeeController::class);
         Route::resource('notifikasi', NotificationController::class);
+        Route::post('/notifikasi/{notification}/send', [AdminController::class, 'notificationSend'])->name('notifikasi.send');
+        Route::get('/pegawai/export', [EmployeeController::class, 'export'])->name('pegawai.export');
+        Route::get('/pegawai/pdf-kgb', [EmployeeController::class, 'exportPdfKgb'])->name('pegawai.kgb.pdf');
+        Route::get('/pegawai/pdf-pensiun', [EmployeeController::class, 'exportPdfPensiun'])->name('pegawai.pensiun.pdf');
     });
-    Route::get('/pegawai/export', [EmployeeController::class, 'export'])->name('pegawai.export');
-    Route::get('/pegawai/pdf-kgb', [EmployeeController::class, 'exportPdfKgb'])->name('pegawai.kgb.pdf');
-    Route::get('/pegawai/pdf-pensiun', [EmployeeController::class, 'exportPdfPensiun'])->name('pegawai.pensiun.pdf');
 });
 
 
@@ -75,7 +76,7 @@ Route::middleware(['auth', 'isPegawai'])->group(function () {
     Route::patch('/profil/password', [PegawaiController::class, 'updatePassword'])->name('profile.password.update');
     Route::get('/notifikasi', [PegawaiController::class, 'notification'])->name('pegawai.notifikasi');
     Route::get('/notifikasi/{notification}', [PegawaiController::class, 'notificationShow'])->name('pegawai.notifikasi.show');
-    Route::patch('/notifikasi/{notification}', [PegawaiController::class, 'notificationUpdate'])->name('pegawai.notifikasi.update')->middleware('throttle:pengaduan_sampah');
+    Route::patch('/notifikasi/{notification}', [PegawaiController::class, 'notificationUpdate'])->name('pegawai.notifikasi.update');
 
     Route::post('/pegawai/2fa/enable', [PegawaiController::class, 'enable2fa'])->name('pegawai.2fa.enable');
     Route::delete('/pegawai/2fa/disable', [PegawaiController::class, 'disable2fa'])->name('pegawai.2fa.disable');

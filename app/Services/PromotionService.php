@@ -13,57 +13,70 @@ class PromotionService
     {
         $employees = Employee::get();
         foreach ($employees as $employee) {
+            $nextRank = $this->getNextRank($employee->rank_grade_id);
+            $nextGol = $this->getGolongan($nextRank);
+            $targetDate = $this->getTargetDate($employee);
+            // if ($employee->nip == "197002052003121005") {
+            //     dump($this->isEligibleByTime($employee));
+            //     dump($nextRank);
+            //     dump($employee->education_level);
+            //     dump($this->canPromote($employee, $nextGol));
+            //     dump($employee->name);
+            // }
+
             if (!$this->isEligibleByTime($employee)) {
                 continue;
             }
-            $nextRank = $this->getNextRank($employee->rank_grade_id);
+            
             if (!$nextRank) {
                 continue;
             }
 
-            $nextGol = $this->getGolongan($nextRank);
             if (!$this->canPromote($employee, $nextGol)) {
                 continue;
             }
 
-            if ($this->requiresSK($employee, $employee->rank_grade_id, $nextRank)) {
-                $targetDate = $this->getTargetDate($employee);
-                $targetKey = $targetDate?->format('Y-m-d');
-                $latestSK = Notification::where('employee_id', $employee->id)
-                    ->where('type', 'pangkat')
-                    ->where('title', 'like', "%{$targetKey}%")
-                    ->latest()
-                    ->first();
-                $approved = $latestSK && $latestSK->status === 'approved';
-                if (!$approved) {
-                    continue;
-                }
+            $latestSK = Notification::where('employee_id', $employee->id)
+                ->where('type', 'pangkat')
+                ->whereBetween('created_at', [
+                    $targetDate->copy()->startOfDay(),
+                    $targetDate->copy()->endOfDay()
+                ])
+                ->latest()
+                ->first();
+
+            $approved = $latestSK && $latestSK->status === 'approved';
+
+            // if ($employee->nip == "197002052003121005") {
+                // dd($approved);
+            // }
+
+            if (!$approved) {
+                continue;
             }
 
-            $this->promote($employee, $nextRank);
+            $this->promote($employee, $nextRank, $targetDate);
         }
     }
 
-    private function isEligibleByTime($employee)
+    public function isEligibleByTime($employee)
     {
         $targetDate = $this->getTargetDate($employee);
-
         if (!$targetDate) return false;
 
-        $now = Carbon::parse(now())->startOfDay();
+        $now = now()->startOfDay();
+        $deadline = $targetDate->copy()->addMonth();
 
-        if (!$now->gte($targetDate)) {
-            return false;
-        }
-        if ($employee->last_promoted_at &&
-            Carbon::parse($employee->last_promoted_at)->gte($targetDate)) {
-            return false;
-        }
+        // belum waktunya
+        if ($now->lt($targetDate)) return false;
+
+        // lewat deadline → hangus
+        if ($now->gt($deadline)) return false;
 
         return true;
     }
 
-    private function getNextRank($currentId)
+    public function getNextRank($currentId)
     {
         $map = [
             14 => 13, // I/a → I/b
@@ -86,12 +99,10 @@ class PromotionService
 
     private function requiresSK($employee, $currentId, $nextId)
     {
-        $currentGol = $this->getGolongan($currentId);
-        $nextGol = $this->getGolongan($nextId);
-        return $currentGol !== $nextGol;
+        return true;
     }
 
-    private function canPromote($employee, $nextGol)
+    public function canPromote($employee, $nextGol)
     {
         $level = $employee->education_level;
 
@@ -99,7 +110,7 @@ class PromotionService
             1 => ['SD','SMP'],
             2 => ['SMA','D1','D2','D3','D4','S1','S2','S3'],
             3 => ['D4','S1','S2','S3'],
-            4 => ['S2','S3'], // 🔴 ini yang bikin S1 tidak bisa ke IV
+            4 => ['S2','S3'],
         ];
 
         return in_array($level, $rules[$nextGol] ?? []);
@@ -114,15 +125,15 @@ class PromotionService
         return $this->requiresSK($employee, $employee->rank_grade_id, $nextRank);
     }
 
-    private function promote($employee, $nextRankId)
+    private function promote($employee, $nextRankId, $targetDate)
     {
         $employee->update([
             'rank_grade_id' => $nextRankId,
-            'last_promoted_at' => now(),
+            'tmt_start'     => $targetDate,
         ]);
     }
 
-    private function getGolongan($rankId)
+    public function getGolongan($rankId)
     {
         return match (true) {
             $rankId >= 11 => 1, // I
@@ -136,17 +147,20 @@ class PromotionService
     {
         if (!$employee->tmt_start) return null;
 
+        $interval = $this->getInterval($employee);
+
         $tmt = Carbon::parse($employee->tmt_start)->startOfDay();
-        $now = Carbon::parse(now())->startOfDay();
+        $now = now()->startOfDay();
 
-        $yearsElapsed = $tmt->floatDiffInYears($now);
+        $yearsElapsed = $tmt->diffInYears($now);
 
-        $nextCycle = ceil($yearsElapsed / 4) * 4;
+        $cycle = floor($yearsElapsed / $interval);
 
-        if ($nextCycle == 0) {
-            $nextCycle = 4;
-        }
+        return $tmt->copy()->addYears($cycle * $interval);
+    }
 
-        return $tmt->copy()->addYears($nextCycle);
+    private function getInterval($employee)
+    {
+        return $employee->position->type === 'fungsional' ? 3 : 4;
     }
 }

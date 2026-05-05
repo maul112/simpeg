@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
             $table->string('position_name')->unique();
+            $table->enum('type', ['fungsional', 'struktural', 'non-fungsional'])
+                ->default('non-fungsional');
             $table->timestamps();
         });
     }

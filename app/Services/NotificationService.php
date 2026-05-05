@@ -68,8 +68,18 @@ class NotificationService
                     continue;
                 }
 
-                foreach ($schedules as $schedule) {
+                if ($type === 'pangkat') {
+                    $nextRank = $this->promotionService->getNextRank($employee->rank_grade_id);
+                    if (!$nextRank) {
+                        continue;
+                    }
+                    $nextGol = $this->promotionService->getGolongan($nextRank);
+                    if (!$this->promotionService->canPromote($employee, $nextGol)) {
+                        continue;
+                    }
+                }
 
+                foreach ($schedules as $schedule) {
                     $triggerDate = $targetDate->copy()->{$schedule['method']}($schedule['value']);
                     if ($now->greaterThanOrEqualTo($triggerDate)) {
                         
@@ -109,16 +119,16 @@ class NotificationService
                             }
 
                             $status = null;
-                            if ($type === 'pangkat' && $needsSK) {
-                                $status = 'pending';
-                            }
+                            // if ($type === 'pangkat' && $needsSK) {
+                            //     $status = 'pending';
+                            // }
 
                             Notification::create([
                                 'employee_id' => $employee->id,
                                 'type'        => $type,
                                 'title'       => $newTitle,
                                 'message'     => "Sistem mendeteksi jadwal " . Str::headline($type) . " untuk {$employee->name} jatuh pada " . $targetDate->format('d M Y') . ". Mohon segera persiapkan berkas yang dibutuhkan.",
-                                'status'      => $status,
+                                'status'      => null,
                             ]);
                             $notifCache[$employee->id][$type][] = $newTitle;
                         }
@@ -146,14 +156,11 @@ class NotificationService
                 return $tmt->copy()->addYears($nextCycle);
                 
             case 'gaji_berkala':
-                // Kelipatan 2 Tahun dari TMT
+                // Kelipatan 1 Bulan dari TMT
                 if (!$employee->tmt_kgb) return null;
                 $tmt = Carbon::parse($employee->tmt_kgb)->startOfDay();
-                $yearsElapsed = $tmt->floatDiffInYears($now);
-                
-                $nextCycle = ceil($yearsElapsed / 2) * 2;
-                if ($nextCycle == 0) $nextCycle = 2;
-                return $tmt->copy()->addYears($nextCycle);
+                $targetDate = $tmt->copy()->addYears(2);
+                return $targetDate;
 
             case 'pensiun':
                 // Umur 60 Tahun

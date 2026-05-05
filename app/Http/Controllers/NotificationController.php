@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\Notification;
+use App\Services\PromotionService;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
@@ -124,11 +125,32 @@ class NotificationController extends Controller
         $messages = [
             'required' => 'Kolom :attribute wajib diisi.',
         ];
-
         $validatedData = $request->validate($rules, $messages);
-
         $notifikasi->update($validatedData);
+        if ($validatedData['status'] === 'approved') {
+            $promotionService = app(PromotionService::class);
+            $employee = $notifikasi->employee;
+            $nextRank = $promotionService->getNextRank($employee->rank_grade_id);
+            if ($nextRank) {
 
+                // 🔥 ambil target date (penting!)
+                $targetDate = $promotionService->getTargetDate($employee);
+
+                // 🔥 cek ulang (anti bug double promote)
+                if ($promotionService->isEligibleByTime($employee)) {
+
+                    $nextGol = $promotionService->getGolongan($nextRank);
+
+                    if ($promotionService->canPromote($employee, $nextGol)) {
+
+                        $employee->update([
+                            'rank_grade_id' => $nextRank,
+                            'tmt_start'     => $targetDate,
+                        ]);
+                    }
+                }
+            }
+        }
         return redirect()->route('notifikasi.index')->with('success', 'Data notifikasi berhasil diperbarui.');
     }
 

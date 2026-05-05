@@ -15,11 +15,11 @@
 
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Navigasi')" class="grid">
+                <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+                    wire:navigate>
+                    {{ __('Dashboard') }}
+                </flux:sidebar.item>
                 @if (auth()->user()->role == 'admin_simpeg')
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                        wire:navigate>
-                        {{ __('Dashboard') }}
-                    </flux:sidebar.item>
                     <flux:sidebar.item icon="briefcase" :href="route('jabatan.index')"
                         :current="request()->routeIs('jabatan.index')" wire:navigate>
                         {{ __('Jabatan') }}
@@ -65,7 +65,6 @@
                     <div class="p-0 text-sm font-normal">
                         <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                             <flux:avatar :name="auth()->user()->email" :initials="auth()->user()->initials()" />
-
                             <div class="grid flex-1 text-start text-sm leading-tight">
                                 <flux:heading class="truncate">Admin</flux:heading>
                                 <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>

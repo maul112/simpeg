@@ -10,20 +10,15 @@ class PensiunService
     public function process()
     {
         $now = now()->startOfDay();
-
-        // 🔴 ambil hanya yang BELUM pensiun
         $employees = Employee::whereNotNull('birth_date')
             ->where(function ($q) {
                 $q->where('status', '!=', 'nonactive');
             })
             ->get();
-
         foreach ($employees as $employee) {
-
             if (!$this->isEligible($employee, $now)) {
                 continue;
             }
-
             $this->retire($employee, $now);
         }
     }
@@ -32,8 +27,6 @@ class PensiunService
     {
         $birth = Carbon::parse($employee->birth_date)->startOfDay();
         $retirementDate = $birth->copy()->addYears(60);
-
-        // 🔴 sudah mencapai usia pensiun
         return $now->gte($retirementDate);
     }
 
@@ -42,5 +35,21 @@ class PensiunService
         $employee->update([
             'status' => 'nonactive',
         ]);
+    }
+
+    private function getPensiunNumber($employee)
+    {
+        $specialPositionIds = [1, 10];
+        if (in_array($employee->position_id, $specialPositionIds)) {
+            return 60;
+        }
+        $positionName = strtolower($employee->position->position_name ?? '');
+        if (
+            str_contains($positionName, 'sekretaris') ||
+            str_contains($positionName, 'kepala dinas lingkungan hidup')
+        ) {
+            return 60;
+        }
+        return 58;
     }
 }

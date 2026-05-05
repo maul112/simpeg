@@ -145,9 +145,14 @@ class PegawaiController extends Controller
         $user = Auth::user();
         $employee = $user->employee;
 
-        // Ambil notifikasi khusus untuk ID pegawai milik user ini
-        // Urutkan dari yang paling baru (latest)
-        $notifications = Notification::where('employee_id', $user->employee_id)
+        $notifications = Notification::where('employee_id', Auth::user()->employee_id)
+            ->where(function ($q) {
+                $q->where('type', '!=', 'pangkat')
+                ->orWhere(function ($q2) {
+                    $q2->where('type', 'pangkat')
+                        ->whereNotNull('status');
+                });
+            })
             ->latest()
             ->paginate(10);
 

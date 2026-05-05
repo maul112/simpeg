@@ -14,18 +14,15 @@ class KgbService
             if (!$this->isEligible($employee)) {
                 continue;
             }
-            $nextDate = $this->getNextKgbDate($employee);
-            if (!$nextDate) {
-                continue;
-            }
+            $nextDate = Carbon::parse($employee->tmt_kgb)->copy()->addYears(2);
             $this->updateKgb($employee, $nextDate);
         }
     }
 
     private function isEligible($employee)
 {
-    $targetDate = $this->getNextKgbDate($employee);
-    if (!$targetDate) return false;
+    $tmt = Carbon::parse($employee->tmt_kgb)->startOfDay();
+    $targetDate = $tmt->copy()->addYears(2);
     
     $now = Carbon::parse(now())->startOfDay();
     
@@ -51,23 +48,10 @@ class KgbService
     return true;
 }
 
-    private function getNextKgbDate($employee)
-    {
-        $tmt = Carbon::parse($employee->tmt_kgb)->startOfDay();
-        $now = Carbon::parse(now())->startOfDay();
-
-        $yearsElapsed = $tmt->diffInYears($now);
-        $cycle = floor($yearsElapsed / 2);
-
-        // ambil siklus saat ini
-        return $tmt->copy()->addYears($cycle * 2);
-    }
-
     private function updateKgb($employee, $nextDate)
     {
         $employee->update([
             'tmt_kgb' => $nextDate,
-            'tmt_kgb_updated_at' => now(),
         ]);
     }
 }

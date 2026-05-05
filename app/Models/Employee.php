@@ -16,6 +16,7 @@ class Employee extends Model
         'education_detail',
         'tmt_start',
         'tmt_end',
+        'tmt_start_copy',
         'tmt_kgb',
         'last_promoted_at',
         'type',
