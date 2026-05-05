@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +13,6 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
-use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Exp;
 
 class PegawaiController extends Controller
 {
@@ -207,5 +205,19 @@ class PegawaiController extends Controller
             'is_read' => true,
         ]);
         return back()->with('success', 'Berkas SK berhasil diunggah dan dikirim ke sistem dan notifikasi ditandai sudah dibaca.');
+    }
+
+    public function read($id)
+    {
+        // 1. Cari data notifikasi berdasarkan ID
+        $notif = Notification::findOrFail($id);
+
+        // 2. Update field is_read menjadi true (1)
+        $notif->update([
+            'is_read' => true
+        ]);
+
+        // 3. Redirect kembali dengan pesan sukses
+        return redirect()->back()->with('success', 'Notifikasi berhasil ditandai sebagai dibaca.');
     }
 }
