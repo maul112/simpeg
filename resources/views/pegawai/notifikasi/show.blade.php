@@ -34,7 +34,7 @@
                         <form action="{{ route('pegawai.notifikasi.update', $notification->id) }}" method="POST"
                             enctype="multipart/form-data" class="space-y-4">
                             @csrf
-                            @method('PATCH')
+                            @method('POST')
 
                             <div
                                 class="p-4 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">

@@ -49,12 +49,12 @@
             {{-- Table --}}
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column class="pl-6">Laporan & Tanggal</flux:table.column>
-                    <flux:table.column>Pelapor</flux:table.column>
-                    <flux:table.column>Tipe</flux:table.column>
-                    <flux:table.column>Status</flux:table.column>
-                    <flux:table.column>Komentar</flux:table.column>
-                    <flux:table.column>Opsi</flux:table.column>
+                    <flux:table.column class="pl-6 uppercase text-[11px] font-bold tracking-wider">Laporan & Tanggal</flux:table.column>
+                    <flux:table.column class="uppercase text-[11px] font-bold tracking-wider">Pelapor</flux:table.column>
+                    <flux:table.column class="uppercase text-[11px] font-bold tracking-wider">Tipe</flux:table.column>
+                    <flux:table.column class="uppercase text-[11px] font-bold tracking-wider">Status</flux:table.column>
+                    <flux:table.column class="uppercase text-[11px] font-bold tracking-wider">Komentar</flux:table.column>
+                    <flux:table.column class="pr-6 text-right uppercase text-[11px] font-bold tracking-wider"></flux:table.column> {{-- Header Opsi dihapus teksnya agar rapi --}}
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -70,15 +70,31 @@
                                         </div>
                                     @endif
                                     <div>
-                                        <div class="font-semibold">#REP-{{ str_pad($report->id, 4, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="text-[10px] text-zinc-400 uppercase tracking-wide">{{ $report->created_at->translatedFormat('d M Y') }}</div>
+                                        <div class="font-semibold text-zinc-800 leading-tight">
+                                            {{ Str::limit($report->deskripsi ?? 'Tidak ada deskripsi', 30) }}
+                                        </div>
+                                        
+                                        <div class="flex flex-col mt-1">
+                                            <span class="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">
+                                                {{ $report->created_at->translatedFormat('d M Y') }}
+                                            </span>
+                                            {{-- Alamat dipindahkan ke sini menggantikan ID --}}
+                                            <span class="text-[10px] text-zinc-500 italic line-clamp-1 max-w-[200px]">
+                                                {{ $report->lokasi_manual }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </flux:table.cell>
 
                             <flux:table.cell>
                                 <div class="text-sm font-medium">{{ $report->nama_pelapor }}</div>
-                                <div class="text-xs text-zinc-400 italic truncate max-w-30">{{ $report->lokasi_manual }}</div>
+                                @if($report->kontak)
+                                    <div class="text-[10px] text-emerald-600 font-bold mt-0.5 flex items-center gap-1">
+                                        <flux:icon.phone class="w-2.5 h-2.5" />
+                                        {{ $report->kontak }}
+                                    </div>
+                                @endif
                             </flux:table.cell>
 
                             <flux:table.cell>
@@ -92,37 +108,46 @@
                                     {{ $report->status }}
                                 </flux:badge>
                             </flux:table.cell>
+                            
                             <flux:table.cell>
                                 <div class="flex items-center gap-1.5">
-                                    <flux:icon.chat-bubble-left-right class="w-4 h-4" />
-                                    {{-- Menggunakan comments_count dari withCount() --}}
-                                    <span class="text-xs font-bold">{{ $report->comments_count ?? 0 }}</span>
+                                    <flux:icon.chat-bubble-left-right class="w-4 h-4 text-zinc-400" />
+                                    <span class="text-xs font-bold text-zinc-600">{{ $report->comments_count ?? 0 }}</span>
                                 </div>
                             </flux:table.cell>
+
                             <flux:table.cell align="right" class="pr-6">
                                 <div class="flex justify-end gap-1">
                                     <flux:modal.trigger name="detail-{{ $report->id }}">
-                                        <flux:button variant="ghost" size="sm" icon="eye" class="btn-load-map" data-report-id="{{ $report->id }}" data-latitude="{{ $report->latitude }}" data-longitude="{{ $report->longitude }}" />
+                                        <flux:button variant="ghost" size="sm" icon="eye" class="btn-load-map text-zinc-500" 
+                                            data-report-id="{{ $report->id }}" 
+                                            data-latitude="{{ $report->latitude }}" 
+                                            data-longitude="{{ $report->longitude }}" />
                                     </flux:modal.trigger>
                                     <flux:modal.trigger name="delete-{{ $report->id }}">
                                         <flux:button variant="ghost" size="sm" icon="trash" class="text-zinc-400 hover:text-red-600" />
                                     </flux:modal.trigger>
                                 </div>
 
-                                {{-- MODAL DETAIL (KOLOM RAPI) --}}
-                                <flux:modal name="detail-{{ $report->id }}" variant="flyout" class="w-full max-w-2xl p-0 overflow-hidden">
-                                    <div class="flex flex-col h-screen bg-white">
-                                        <div class="p-6 border-b bg-zinc-50/50">
-                                            <flux:heading size="lg" class="font-bold">Detail Laporan #{{ str_pad($report->id, 4, '0', STR_PAD_LEFT) }}</flux:heading>
-                                            <flux:subheading>Informasi lengkap dan tanggapan petugas.</flux:subheading>
+                                {{-- MODAL DETAIL (WA sudah dihapus di sini sesuai permintaan cek lapor) --}}
+                                <flux:modal name="detail-{{ $report->id }}" class="w-full max-w-3xl p-0 overflow-hidden">
+                                    <div class="bg-white">
+                                        <div class="p-6 border-b bg-zinc-50/50 flex justify-between items-start">
+                                            <div class="text-left">
+                                                <flux:heading size="lg" class="font-bold">Detail Laporan</flux:heading>
+                                                <flux:subheading>Informasi lengkap dan tanggapan petugas.</flux:subheading>
+                                            </div>
+                                            <flux:modal.close>
+                                                <flux:button variant="ghost" icon="x-mark" size="sm" />
+                                            </flux:modal.close>
                                         </div>
 
-                                        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                                            {{-- Grid Atas: Info Dasar --}}
+                                        <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                                            {{-- Info Dasar --}}
                                             <div class="grid grid-cols-2 gap-4">
                                                 <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-100 text-left">
                                                     <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Pelapor</p>
-                                                    <p class="text-sm font-semibold text-zinc-800 truncate">{{ $report->nama_pelapor }}</p>
+                                                    <p class="text-sm font-semibold text-zinc-800">{{ $report->nama_pelapor }}</p>
                                                 </div>
                                                 <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-100 text-left">
                                                     <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Waktu Lapor</p>
@@ -130,7 +155,7 @@
                                                 </div>
                                             </div>
 
-                                            {{-- Grid Tengah: Media & Map Bersampingan --}}
+                                            {{-- Media --}}
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div class="space-y-1 text-left">
                                                     <p class="text-[10px] font-bold text-zinc-400 uppercase px-1">Foto Bukti</p>
@@ -160,13 +185,9 @@
 
                                             <hr class="border-zinc-100">
 
-                                            {{-- BAGIAN DISKUSI / KOMENTAR --}}
+                                            {{-- Diskusi --}}
                                             <div class="space-y-4 text-left">
-                                                <div class="flex items-center gap-2">
-                                                    <flux:icon.chat-bubble-bottom-center-text class="w-4 h-4 text-zinc-400" />
-                                                    <p class="text-sm font-bold text-zinc-700">Tanggapan & Diskusi</p>
-                                                </div>
-
+                                                <p class="text-sm font-bold text-zinc-700">Tanggapan & Diskusi</p>
                                                 <div class="space-y-3">
                                                     @forelse($report->comments as $comment)
                                                         <div class="flex gap-3 {{ $comment->user_id == Auth::id() ? 'flex-row-reverse text-right' : '' }}">
@@ -181,35 +202,26 @@
                                                             </div>
                                                         </div>
                                                     @empty
-                                                        <div class="text-center py-4 bg-zinc-50 rounded-xl border border-zinc-100 text-[11px] text-zinc-400 italic">
-                                                            Belum ada tanggapan.
-                                                        </div>
+                                                        <div class="text-center py-4 text-[11px] text-zinc-400 italic">Belum ada tanggapan.</div>
                                                     @endforelse
                                                 </div>
-
-                                                {{-- Input Chat --}}
-                                                <form action="{{ route('admin.pengaduan.comment', $report->id) }}" method="POST" class="relative mt-2">
-                                                    @csrf
-                                                    <textarea name="body" rows="2" placeholder="Tulis tanggapan atau instruksi..." 
-                                                        class="w-full p-3 pr-12 text-xs bg-white border border-zinc-200 rounded-xl focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none"></textarea>
-                                                    <button type="submit" class="absolute right-2 bottom-2 p-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
-                                                        <flux:icon.paper-airplane class="w-3.5 h-3.5" />
-                                                    </button>
-                                                </form>
                                             </div>
                                         </div>
 
-                                        {{-- Footer Action --}}
-                                        <div class="p-6 border-t bg-zinc-50">
+                                        {{-- Footer Update Status --}}
+                                        <div class="p-6 border-t bg-zinc-50 flex flex-col md:flex-row gap-4">
+                                            <form action="{{ route('admin.pengaduan.comment', $report->id) }}" method="POST" class="flex-1 flex gap-2">
+                                                @csrf
+                                                <flux:input name="body" placeholder="Tulis tanggapan..." class="flex-1" />
+                                                <flux:button type="submit" variant="ghost" icon="paper-airplane" />
+                                            </form>
                                             <form action="{{ route('admin.pengaduan.status', $report->id) }}" method="POST" class="flex items-center gap-2">
                                                 @csrf @method('PATCH')
-                                                <div class="flex-1">
-                                                    <flux:select name="status">
-                                                        <option value="pending" {{ $report->status == 'pending' ? 'selected' : '' }}>🔴 Pending</option>
-                                                        <option value="proses" {{ $report->status == 'proses' ? 'selected' : '' }}>🔵 Diproses</option>
-                                                        <option value="selesai" {{ $report->status == 'selesai' ? 'selected' : '' }}>🟢 Selesai</option>
-                                                    </flux:select>
-                                                </div>
+                                                <flux:select name="status" class="min-w-32">
+                                                    <option value="pending" {{ $report->status == 'pending' ? 'selected' : '' }}>🔴 Pending</option>
+                                                    <option value="proses" {{ $report->status == 'proses' ? 'selected' : '' }}>🔵 Diproses</option>
+                                                    <option value="selesai" {{ $report->status == 'selesai' ? 'selected' : '' }}>🟢 Selesai</option>
+                                                </flux:select>
                                                 <flux:button type="submit" variant="primary" class="bg-emerald-600">Update</flux:button>
                                             </form>
                                         </div>
@@ -237,13 +249,13 @@
                             <flux:table.cell colspan="6" class="text-center py-20 text-zinc-400 italic">Tidak ada pengaduan ditemukan</flux:table.cell>
                         </flux:table.row>
                     @endforelse
-                </flux:table.rows>
-            </flux:table>
+                </flux:table>
 
-            <div class="p-6 border-t border-zinc-100">
-                {{ $reports->links() }}
-            </div>
-        </flux:card>
+                <div class="p-6 border-t border-zinc-100">
+                    {{ $reports->links() }}
+                </div>
+            </flux:card>
+        </div>
     </div>
 
     {{-- Leaflet Script --}}
@@ -272,4 +284,4 @@
             });
         });
     </script>
-</x-layouts::app>
+</x-layouts::app>   

@@ -46,7 +46,7 @@
         </flux:modal.trigger>
         <flux:modal name="mark_is_read-{{ $notif->id }}" class="min-w-88">
             {{-- Form diarahkan ke fungsi destroy di Controller --}}
-            <form action="{{ route('pegawai.notifikasi.show', $notif->id) }}" method="POST">
+            <form action="{{ route('pegawai.notifikasi.read', $notif->id) }}" method="POST">
                 @csrf
                 @method('PATCH')
 

@@ -128,28 +128,20 @@ class NotificationController extends Controller
         $validatedData = $request->validate($rules, $messages);
         $notifikasi->update($validatedData);
         if ($validatedData['status'] === 'approved') {
+            // dd("oke");
             $promotionService = app(PromotionService::class);
             $employee = $notifikasi->employee;
             $nextRank = $promotionService->getNextRank($employee->rank_grade_id);
             if ($nextRank) {
-
-                // 🔥 ambil target date (penting!)
                 $targetDate = $promotionService->getTargetDate($employee);
-
-                // 🔥 cek ulang (anti bug double promote)
-                if ($promotionService->isEligibleByTime($employee)) {
-
-                    $nextGol = $promotionService->getGolongan($nextRank);
-
-                    if ($promotionService->canPromote($employee, $nextGol)) {
-
-                        $employee->update([
-                            'rank_grade_id' => $nextRank,
-                            'tmt_start'     => $targetDate,
-                        ]);
-                    }
+                $nextGol = $promotionService->getGolongan($nextRank);
+                if ($promotionService->canPromote($employee, $nextGol)) {
+                    $employee->update([
+                        'rank_grade_id' => $nextRank,
+                        'tmt_start'     => $targetDate,
+                    ]);
                 }
-            }
+        }
         }
         return redirect()->route('notifikasi.index')->with('success', 'Data notifikasi berhasil diperbarui.');
     }

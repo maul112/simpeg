@@ -16,12 +16,13 @@ class PromotionService
             $nextRank = $this->getNextRank($employee->rank_grade_id);
             $nextGol = $this->getGolongan($nextRank);
             $targetDate = $this->getTargetDate($employee);
-            // if ($employee->nip == "197002052003121005") {
+            // if ($employee->nip == "197304151998032011") {
             //     dump($this->isEligibleByTime($employee));
             //     dump($nextRank);
             //     dump($employee->education_level);
             //     dump($this->canPromote($employee, $nextGol));
             //     dump($employee->name);
+            //     dd($employee->rank_grade_id);
             // }
 
             if (!$this->isEligibleByTime($employee)) {
@@ -42,8 +43,8 @@ class PromotionService
                 ->latest()
                 ->first();
 
-            // if ($employee->nip == "197002052003121005") {
-                // dd($approved);
+            // if ($employee->nip == "197304151998032011") {
+            //     dd($latestSK);
             // }
 
             if ($latestSK !== null && $latestSK->status !== 'approved') {
@@ -159,7 +160,7 @@ class PromotionService
 
         $cycle = floor($yearsElapsed / $interval);
 
-        return $tmt->copy()->addYears($cycle * $interval);
+        return $tmt->copy()->addYears(4);
     }
 
     private function getInterval($employee)
