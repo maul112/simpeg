@@ -39,8 +39,8 @@
 
     {{-- Tombol Aksi (Hanya muncul jika belum dibaca) --}}
     @if(!$notif->is_read)
-        <flux:modal.trigger name="mark_is_read-{{ $notif->id }}">
-            <flux:button size="sm" variant="outline" class="w-full sm:w-auto">
+        <flux:modal.trigger name="mark_is_read-{{ $notif->id }}" onclick="event.stopPropagation(); event.preventDefault();">
+            <flux:button size="sm" variant="outline" class="w-full sm:w-auto cursor-pointer">
                 Tandai Dibaca
             </flux:button>
         </flux:modal.trigger>
@@ -63,7 +63,7 @@
                             <flux:button variant="ghost">Batal</flux:button>
                         </flux:modal.close>
 
-                        <flux:button type="submit" color="emerald" variant="primary">
+                        <flux:button type="submit" color="emerald" variant="primary" class="cursor-pointer">
                             Ya, Tandai Dibaca
                         </flux:button>
                     </div>

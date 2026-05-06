@@ -22,9 +22,7 @@ return new class extends Migration
             $table->string('education_detail')->nullable();
             $table->date('tmt_start')->default(now());
             $table->date('tmt_end')->nullable();
-            $table->date('tmt_start_copy')->default(now());
             $table->date('tmt_kgb')->nullable();
-            $table->date('last_promoted_at')->nullable();
             $table->enum('type', ['Non ASN', 'ASN'])->default('Non ASN');
 
             // RELASI

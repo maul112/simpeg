@@ -64,7 +64,7 @@ class NotificationService
 
                 $targetDate = $this->calculateTargetDate($employee, $type, $now);
 
-                if (!$targetDate || $now->greaterThanOrEqualTo($targetDate)) {
+                if (!$targetDate) {
                     continue;
                 }
 
@@ -107,14 +107,13 @@ class NotificationService
 
                             $newTitle = 'Peringatan H-' . $schedule['label'] . ' ' . Str::headline($type) . ' (pada ' . $targetDate->format('Y-m-d') . ')';
 
-                            $needsSK = $this->promotionService->needsSK($employee);
-                            
                             $existingSK = Notification::where('employee_id', $employee->id)
                                 ->where('type', 'pangkat')
-                                ->whereIn('status', ['pending','rejected'])
+                                ->where('title', 'like', '%' . $targetDate->format('Y-m-d') . '%')
+                                ->whereIn('status', ['pending', 'rejected'])
                                 ->exists();
 
-                            if ($type === 'pangkat' && $needsSK && $existingSK) {
+                            if ($type === 'pangkat' && $existingSK) {
                                 continue;
                             }
 
@@ -148,12 +147,11 @@ class NotificationService
             case 'pangkat':
                 // Kelipatan 4 Tahun dari TMT
                 if (!$employee->tmt_start) return null;
-                $tmt = Carbon::parse($employee->tmt_start)->startOfDay();
-                $yearsElapsed = $tmt->floatDiffInYears($now);
-                
-                $nextCycle = ceil($yearsElapsed / 4) * 4;
-                if ($nextCycle == 0) $nextCycle = 4;
-                return $tmt->copy()->addYears($nextCycle);
+                // if($employee->nip == "199412102025042002") {
+                //     dump($this->promotionService->getNextTargetDate($employee));
+                //     dd($employee->tmt_start);
+                // }
+                return $this->promotionService->getNextTargetDate($employee);
                 
             case 'gaji_berkala':
                 // Kelipatan 1 Bulan dari TMT

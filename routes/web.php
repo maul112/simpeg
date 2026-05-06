@@ -75,7 +75,7 @@ Route::middleware(['auth', 'isPegawai'])->group(function () {
     Route::patch('/profil/email', [PegawaiController::class, 'updateEmail'])->name('profile.email.update');
     Route::patch('/profil/password', [PegawaiController::class, 'updatePassword'])->name('profile.password.update');
     Route::get('/notifikasi', [PegawaiController::class, 'notification'])->name('pegawai.notifikasi');
-    Route::patch('/notifikasi/{id}', [PegawaiController::class, 'read'])->name('pegawai.notifikasi.read');
+    Route::patch('/notifikasi/{id}/read', [PegawaiController::class, 'read'])->name('pegawai.notifikasi.read');
     Route::get('/notifikasi/{notification}', [PegawaiController::class, 'notificationShow'])->name('pegawai.notifikasi.show');
     Route::post('/notifikasi/{notification}', [PegawaiController::class, 'notificationUpdate'])->name('pegawai.notifikasi.update');
 

@@ -50,7 +50,7 @@
                                 <p class="text-sm text-red-500">{{ $message }}</p>
                             @enderror
 
-                            <flux:button type="submit" variant="primary" class="w-full bg-emerald-600 hover:bg-emerald-700">
+                            <flux:button type="submit" variant="primary" class="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer">
                                 Unggah Berkas
                             </flux:button>
                         </form>

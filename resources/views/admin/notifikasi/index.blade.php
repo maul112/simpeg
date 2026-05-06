@@ -83,7 +83,7 @@
                                     <form action="{{ route('notifikasi.send', $notif->id) }}" method="POST"
                                         onsubmit="return confirm('Kirim notifikasi ini ke pegawai?')">
                                         @csrf
-                                        <flux:button size="sm" color="blue" type="submit">
+                                        <flux:button size="sm" color="blue" type="submit" class="cursor-pointer">
                                             ✈ Kirim
                                         </flux:button>
                                     </form>
