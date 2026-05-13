@@ -44,7 +44,7 @@
                         2. Detail Laporan
                     </legend>
                     <div class="space-y-6">
-                        <flux:select id="tipe_pegawai" name="tipe_sampah" label="Tipe Pegawai" required>
+                        <flux:select id="tipe_pegawai" name="tipe_sampah" label="Tipe Sampah" required>
                             <option value="">Pilih Tipe Sampah...</option>
                             <option value="organik" {{ old('tipe_sampah') == 'organik' ? 'selected' : '' }}>Organik
                             </option>
