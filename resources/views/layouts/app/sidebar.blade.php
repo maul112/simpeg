@@ -45,6 +45,10 @@
                         :current="request()->routeIs('admin.pengaduan.index')" wire:navigate>
                         {{ __('Pengaduan') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="map-pin" :href="route('admin.tps.index')"
+                            :current="request()->routeIs('admin.tps.index')" wire:navigate>
+                            {{ __('Titik TPS') }}
+                    </flux:sidebar.item>
                 @endif
             </flux:sidebar.group>
         </flux:sidebar.nav>
