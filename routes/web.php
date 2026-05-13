@@ -7,6 +7,7 @@ use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StrukturalController;
 use App\Http\Controllers\TamuController;
+use App\Http\Controllers\TpsController;
 use App\Livewire\PositionLive;
 use App\Livewire\RankGradeLive;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,8 @@ Route::get('/pengaduan', [TamuController::class, 'create'])->name('pengaduan.cre
 Route::post('/pengaduan', [TamuController::class, 'store'])->name('pengaduan.store')->middleware('throttle:pengaduan_sampah');
 Route::get('/alur-lapor', [TamuController::class, 'alurLapor'])->name('alur-lapor');
 Route::get('/cek-status', [TamuController::class, 'cekStatus'])->name('cek.status');
+Route::get('/lokasi-tps', [TamuController::class, 'tpsWarga'])->name('tamu.tps');
+
 
 // Detail Pengaduan dipindah ke LUAR agar warga bisa lihat progress lewat link/ID Tracking
 Route::get('/pengaduan/{pengaduan}', [ReportController::class, 'show'])->name('admin.pengaduan.show');
@@ -58,7 +61,15 @@ Route::middleware(['auth', 'admin', 'isAdminSampah'])->group(function () {
         Route::get('/pengaduan', [ReportController::class, 'index'])->name('admin.pengaduan.index');
         Route::patch('/pengaduan/{pengaduan}/status', [ReportController::class, 'updateStatus'])->name('admin.pengaduan.status');
         Route::delete('/pengaduan/{pengaduan}', [ReportController::class, 'destroy'])->name('admin.pengaduan.destroy');
+        // --- ROUTE TPS ---
+        Route::get('/tps', [TpsController::class, 'index'])->name('admin.tps.index');
+        Route::post('/tps', [TpsController::class, 'store'])->name('admin.tps.store');
         
+        // TAMBAHKAN DUA BARIS INI:
+        Route::get('/tps/{tps}/edit', [TpsController::class, 'edit'])->name('admin.tps.edit');
+        Route::put('/tps/{tps}', [TpsController::class, 'update'])->name('admin.tps.update');
+        
+        Route::delete('/tps/{tps}', [TpsController::class, 'destroy'])->name('admin.tps.destroy');
         // Route Simpan Komentar Petugas
         Route::post('/pengaduan/{pengaduan}/comment', [ReportController::class, 'storeComment'])->name('admin.pengaduan.comment');
     });

@@ -125,4 +125,18 @@ class TamuController extends Controller
         $struktural = Struktural::where('is_active', true)->first();
         return view('profil-dlh', compact('struktural'));
     }
+    // Tambahkan di bagian bawah sebelum tutup kurung kurawal }
+    public function tpsWarga(Request $request)
+    {
+        $query = \App\Models\Tps::query();
+
+        // Logika Filter Kecamatan
+        if ($request->filled('kecamatan')) {
+            $query->where('kecamatan', $request->kecamatan);
+        }
+
+        $all_tps = $query->get();
+
+        return view('tamu.tps', compact('all_tps'));
+    }
 }
