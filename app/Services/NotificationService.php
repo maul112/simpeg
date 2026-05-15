@@ -25,7 +25,7 @@ class NotificationService
             ['method' => 'subMonths', 'value' => 8, 'label' => '8 Bulan']
         ],
         'gaji_berkala' => [
-            ['method' => 'subMonths', 'value' => 1, 'label' => '1 Bulan']
+            ['method' => 'subMonths', 'value' => 2, 'label' => '2 Bulan']
         ],
         'pensiun' => [
             ['method' => 'subYears', 'value' => 1, 'label' => '1 Tahun']

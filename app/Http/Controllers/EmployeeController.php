@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\EmployeesExport;
 use App\Models\Employee;
+use App\Models\Notification;
 use App\Models\Position;
 use App\Models\RankGrade;
 use App\Models\User;
@@ -29,8 +30,8 @@ class EmployeeController extends Controller
             ->with(['rankGrade'])
             ->when($search, function ($query, $search) {
                 return $query->where(function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('nip', 'like', "%{$search}%");
+                    $q->where('name', 'like', "%{$search}%");
+                    // ->orWhere('nip', 'like', "%{$search}%");
                 });
             })
             ->when($rank_grade_id, function ($query, $rank_grade_id) {
@@ -104,8 +105,8 @@ class EmployeeController extends Controller
             'status'        => 'Status Pegawai',
             'education_level' => 'Pendidikan Terakhir',
             'education_detail' => 'Detail Pendidikan',
-            'tmt_start'     => 'TMT Awal',
-            'tmt_end'       => 'TMT Akhir',
+            'tmt_start'     => 'TMT Pangkat Awal',
+            'tmt_end'       => 'TMT Pangkat Akhir',
             'tmt_kgb'       => 'TMT KGB',
             'type'          => 'Tipe Pegawai',
             'position_id'   => 'Jabatan',
@@ -183,6 +184,9 @@ class EmployeeController extends Controller
         */
     public function update(Request $request, Employee $pegawai)
     {
+        $oldTmtKgb = $pegawai->tmt_kgb;
+        $oldTmtStart = $pegawai->tmt_start;
+        $oldBirthDate = $pegawai->birth_date;
         $rules = [
             // 'email'         => 'required|email|unique:users,email,' . ($user ? $user->id : ''),
             // 'password'      => 'nullable|min:8',
@@ -216,8 +220,8 @@ class EmployeeController extends Controller
             'name'          => 'Nama',
             'birth_date'    => 'Tanggal Lahir',
             'gender'        => 'Jenis Kelamin',
-            'tmt_start'     => 'TMT Awal',
-            'tmt_end'       => 'TMT Akhir',
+            'tmt_start'     => 'TMT Pangkat Awal',
+            'tmt_end'       => 'TMT Pangkat Akhir',
             'tmt_kgb'       => 'TMT Kenaikan Gaji Berkala',
             'type'          => 'Tipe Pegawai',
             'position_id'   => 'Jabatan',
@@ -244,6 +248,50 @@ class EmployeeController extends Controller
                 'rank_grade_id' => $validatedData['rank_grade_id'] ?? null,
             ]);
         });
+
+        if ($oldTmtKgb != $request->tmt_kgb) {
+            $oldTmtKgb = Carbon::parse($oldTmtKgb)->addYears(2)->format('Y-m-d');
+            $query = Notification::where('employee_id', $pegawai->id)
+                ->where('type', 'gaji_berkala')
+                ->where('title', 'like', '%' . $oldTmtKgb . '%');
+            $notif = $query->latest()->first();
+            $result = $notif?->delete();
+        }
+
+        if ($oldTmtStart != $request->tmt_start) {
+            $interval = $pegawai->position->type === 'fungsional'
+                ? 3
+                : 4;
+
+            $targetDate = Carbon::parse($oldTmtStart)
+                ->addYears($interval)
+                ->format('Y-m-d');
+
+            $query = Notification::where('employee_id', $pegawai->id)
+                ->where('type', 'pangkat')
+                ->where('title', 'like', '%' . $targetDate . '%');
+            $notif = $query->latest()->first();
+            $result = $notif?->delete();
+        }
+
+        if ($oldBirthDate != $request->birth_date) {
+            $pensiunUmur = (
+                $pegawai->position_id == 1 ||
+                $pegawai->position_id == 10 ||
+                str_contains($pegawai->position->position_name, 'Sekretaris') ||
+                str_contains($pegawai->position->position_name, 'Kepala Dinas Lingkungan Hidup')
+            ) ? 60 : 58;
+
+            $targetDate = Carbon::parse($oldBirthDate)
+                ->addYears($pensiunUmur)
+                ->format('Y-m-d');
+
+            $query = Notification::where('employee_id', $pegawai->id)
+                ->where('type', 'pensiun')
+                ->where('title', 'like', '%' . $targetDate . '%');
+            $notif = $query->latest()->first();
+            $result = $notif?->delete();
+        }
 
         return redirect()->route('pegawai.index')->with('success', 'Data Pegawai berhasil diperbarui!');
     }
@@ -273,23 +321,30 @@ class EmployeeController extends Controller
 
     public function exportPdfKgb()
     {
-        // 🔴 tanggal sekarang (bisa di-hardcode untuk testing)
-        $now = now();
-        // $now = Carbon::parse('2026-04-01'); // untuk test
+        $now = now()->startOfDay();
 
-        $target = $now->copy()->addMonths(2)->subYears(2);
+        // rentang target KGB
+        $start = $now->copy()->addMonth()->subYears(2)->startOfMonth();
+        $end   = $now->copy()->addMonths(2)->subYears(2)->endOfMonth();
 
         $employees = Employee::with(['rankGrade', 'position'])
             ->whereNotNull('tmt_kgb')
-            ->whereMonth('tmt_kgb', $target->month)
-            ->whereYear('tmt_kgb', $target->year)
+            ->whereBetween('tmt_kgb', [$start, $end])
+            ->orderBy('tmt_kgb')
             ->get();
 
-        $periode = strtoupper($target->translatedFormat('F Y'));
+        $periode = strtoupper(
+            $start->translatedFormat('F Y')
+            . ' - ' .
+            $end->translatedFormat('F Y')
+        );
+
         $title = "DAFTAR KENAIKAN GAJI BERKALA (KGB) PERIODE {$periode}";
 
-        $pdf = Pdf::loadView('admin.pdf.pegawai', compact('employees', 'periode', 'title'))
-            ->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView(
+            'admin.pdf.pegawai',
+            compact('employees', 'periode', 'title')
+        )->setPaper('a4', 'portrait');
 
         return $pdf->stream('pegawai.kgb.pdf');
     }

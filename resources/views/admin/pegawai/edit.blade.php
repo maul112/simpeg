@@ -85,7 +85,7 @@
                             required />
 
                         <flux:input id="tmt_akhir" type="date" name="tmt_end"
-                            label="TMT Akhir (Kosongkan jika aktif terus)"
+                            label="TMT Pangkat Akhir (Kosongkan jika aktif terus)"
                             value="{{ old('tmt_end', $pegawai->tmt_end ? \Carbon\Carbon::parse($pegawai->tmt_end)->format('Y-m-d') : '') }}" />
 
                         <flux:input id="tmt_kgb" type="date" name="tmt_kgb" label="TMT Kenaikan Gaji Berkala"

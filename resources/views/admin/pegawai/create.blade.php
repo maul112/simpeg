@@ -81,7 +81,7 @@
                             value="{{ old('tmt_start') }}" required />
 
                         <flux:input id="tmt_akhir" type="date" name="tmt_end"
-                            label="TMT Akhir (Kosongkan jika aktif terus)" value="{{ old('tmt_end') }}" />
+                            label="TMT Pangkat Akhir (Kosongkan jika aktif terus)" value="{{ old('tmt_end') }}" />
 
                         <flux:input id="tmt_kgb" type="date" name="tmt_kgb" label="TMT Kenaikan Gaji Berkala"
                             value="{{ old('tmt_kgb') }}" required />
