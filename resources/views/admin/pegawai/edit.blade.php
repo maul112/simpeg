@@ -136,7 +136,7 @@
                         Batal
                     </flux:button>
 
-                    <flux:button type="submit" variant="primary" class="cursor-pointer">
+                    <flux:button type="submit" variant="primary" class="cursor-pointer bg-emerald-600">
                         Simpan Perubahan
                     </flux:button>
                 </div>

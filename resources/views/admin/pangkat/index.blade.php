@@ -11,9 +11,9 @@
                 <flux:subheading>Kelola data pangkat dan golongan</flux:subheading>
             </div>
 
-            <flux:button wire:click="openCreate">
+            {{-- <flux:button wire:click="openCreate">
                 Tambah Pangkat
-            </flux:button>
+            </flux:button> --}}
         </div>
 
         {{-- Table --}}
@@ -48,13 +48,13 @@
 
                             <flux:button size="sm" wire:key="edit-btn-{{ $rank->id }}"
                                 wire:click="openEdit({{ $rank->id }})" wire:loading.attr="disabled"
-                                wire:target="openEdit({{ $rank->id }})">
+                                wire:target="openEdit({{ $rank->id }})" class="cursor-pointer">
                                 Edit
                             </flux:button>
 
                             <flux:button size="sm" variant="danger" wire:key="delete-btn-{{ $rank->id }}"
                                 wire:click="delete({{ $rank->id }})" wire:loading.attr="disabled"
-                                wire:confirm="Yakin ingin menghapus?">
+                                wire:confirm="Yakin ingin menghapus?" class="cursor-pointer">
                                 Hapus
                             </flux:button>
 
@@ -96,11 +96,11 @@
             <flux:input label="Golongan" wire:model.defer="grade_code" />
 
             <div class="flex justify-end gap-2 mt-6">
-                <flux:button variant="ghost" wire:click="closeModal">
+                <flux:button variant="ghost" wire:click="closeModal" class="cursor-pointer">
                     Batal
                 </flux:button>
 
-                <flux:button wire:click="save" wire:loading.attr="disabled" wire:target="save">
+                <flux:button wire:click="save" wire:loading.attr="disabled" wire:target="save" class="cursor-pointer bg-emerald-600">
                     {{ $isEdit ? 'Update' : 'Simpan' }}
                 </flux:button>
             </div>

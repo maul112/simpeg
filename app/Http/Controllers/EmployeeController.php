@@ -349,29 +349,69 @@ class EmployeeController extends Controller
         return $pdf->stream('pegawai.kgb.pdf');
     }
 
-    public function exportPdfPensiun() {
-        $now = now();
-        $end = $now->copy()->addMonths(8);
+    public function exportPdfPensiun()
+    {
+        $now = now()->startOfDay();
 
         $employees = Employee::with(['rankGrade', 'position'])
             ->whereNotNull('birth_date')
             ->get()
-            ->filter(function ($e) use ($now, $end) {
-                $pensiun = Carbon::parse($e->birth_date)->addYears(60);
+            ->filter(function ($e) use ($now) {
 
-                return $pensiun->between($now, $end);
+                $positionName = strtolower(
+                    optional($e->position)->position_name ?? ''
+                );
+
+                // sama persis seperti NotificationService
+                $umurPensiun = (
+                    $e->position_id == 1 ||
+                    $e->position_id == 10 ||
+                    str_contains($positionName, 'sekretaris') ||
+                    str_contains($positionName, 'kepala dinas')
+                ) ? 60 : 58;
+
+                // tanggal pensiun
+                $pensiunDate = Carbon::parse($e->birth_date)
+                    ->addYears($umurPensiun)
+                    ->startOfDay();
+
+                // trigger H-1 tahun
+                $triggerDate = $pensiunDate
+                    ->copy()
+                    ->subYear();
+
+                // SAMA PERSIS DENGAN NOTIF
+                return $now->gte($triggerDate);
             })
             ->sortBy(function ($e) {
-                return Carbon::parse($e->birth_date)->addYears(60);
+
+                $positionName = strtolower(
+                    optional($e->position)->position_name ?? ''
+                );
+
+                $umurPensiun = (
+                    $e->position_id == 1 ||
+                    $e->position_id == 10 ||
+                    str_contains($positionName, 'sekretaris') ||
+                    str_contains($positionName, 'kepala dinas')
+                ) ? 60 : 58;
+
+                return Carbon::parse($e->birth_date)
+                    ->addYears($umurPensiun);
             })
             ->values();
-        
-        // $periode = strtoupper($end->translatedFormat('F Y'));
+
         $title = "DAFTAR PEGAWAI MEMASUKI MASA PENSIUN";
-        
-        $pdf = Pdf::loadView('admin.pdf.pegawai', compact('employees', 'title'))
-            ->setPaper('a4', 'portrait');
-        
-        return $pdf->stream('pegawai.kgb.pdf');
+
+        $periode = strtoupper(
+            'PER ' . $now->translatedFormat('d F Y')
+        );
+
+        $pdf = Pdf::loadView(
+            'admin.pdf.pegawai',
+            compact('employees', 'title', 'periode')
+        )->setPaper('a4', 'portrait');
+
+        return $pdf->stream('pegawai.pensiun.pdf');
     }
 }
